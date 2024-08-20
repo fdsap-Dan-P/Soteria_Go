@@ -6,7 +6,6 @@ import (
 	"soteria_go/pkg/controllers/middleware"
 	"soteria_go/pkg/controllers/middleware/validations"
 
-	"soteria_go/pkg/models/errors"
 	"soteria_go/pkg/models/request"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
@@ -149,39 +148,19 @@ func MainUserLogIn(c *fiber.Ctx) error {
 		if strings.TrimSpace(userAccount.Last_login) == "" && strings.TrimSpace(userPassword.Last_password_reset) == "" && userPassword.Requires_password_reset {
 			middleware.ActivityLogger(userAccount.Username, funcName, "126", methodUsed, endpoint, userCredentialByte, []byte(""), "Validation Failed", "New User Account", nil)
 
-			sessionId := middleware.CreateAndStoreSessionId(userAccount.Username, funcName, methodUsed, endpoint, currentDateTime, userIP, userAccount.User_id, userCredentialByte)
-			if !sessionId.Data.IsSuccess {
-				return c.JSON(sessionId)
+			returnMessage := middleware.ResponseData(userAccount.Username, funcName, "126", methodUsed, endpoint, (userCredentialByte), []byte(""), "", nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
 			}
-			return c.JSON(response.ReturnModel{
-				RetCode: "126",
-				Message: "Validation Failed",
-				Data: errors.ErrorModel{
-					Message:    "New User Account",
-					User_id:    userAccount.User_id,
-					Session_id: sessionId.Data.Message,
-					Is_active:  true, // session id status
-				},
-			})
 		} // new user inputted invalid temporary credential
 
 		if strings.TrimSpace(userPassword.Last_password_reset) == "" {
 			middleware.ActivityLogger(userAccount.Username, funcName, "126", methodUsed, endpoint, userCredentialByte, []byte(""), "Validation Failed", "Unlocked User Account", nil)
 
-			sessionId := middleware.CreateAndStoreSessionId(userAccount.Username, funcName, methodUsed, endpoint, currentDateTime, userIP, userAccount.User_id, userCredentialByte)
-			if !sessionId.Data.IsSuccess {
-				return c.JSON(sessionId)
+			returnMessage := middleware.ResponseData(userAccount.Username, funcName, "126", methodUsed, endpoint, (userCredentialByte), []byte(""), "", nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
 			}
-			return c.JSON(response.ReturnModel{
-				RetCode: "126",
-				Message: "Validation Failed",
-				Data: errors.ErrorModel{
-					Message:    "Unlocked User Account",
-					User_id:    userAccount.User_id,
-					Session_id: sessionId.Data.Message,
-					Is_active:  true, // session id status
-				},
-			})
 		} // unlocked, required reset password
 
 		// --- Validatioin Here --- //
@@ -196,39 +175,19 @@ func MainUserLogIn(c *fiber.Ctx) error {
 	if strings.TrimSpace(userAccount.Last_login) == "" && strings.TrimSpace(userPassword.Last_password_reset) == "" && userPassword.Requires_password_reset {
 		middleware.ActivityLogger(userAccount.Username, funcName, "101", methodUsed, endpoint, userCredentialByte, []byte(""), "Validation Failed", "Password Expired", nil)
 
-		sessionId := middleware.CreateAndStoreSessionId(userAccount.Username, funcName, methodUsed, endpoint, currentDateTime, userIP, userAccount.User_id, userCredentialByte)
-		if !sessionId.Data.IsSuccess {
-			return c.JSON(sessionId)
+		returnMessage := middleware.ResponseData(userAccount.Username, funcName, "101", methodUsed, endpoint, (userCredentialByte), []byte(""), "", nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
 		}
-		return c.JSON(response.ReturnModel{
-			RetCode: "101",
-			Message: "Validation Failed",
-			Data: errors.ErrorModel{
-				Message:    "Unlocked User Account",
-				User_id:    userAccount.User_id,
-				Session_id: sessionId.Data.Message,
-				Is_active:  true, // session id status
-			},
-		})
 	} // first login
 
 	if strings.TrimSpace(userAccount.Last_login) != "" && strings.TrimSpace(userPassword.Last_password_reset) == "" && userPassword.Requires_password_reset {
 		middleware.ActivityLogger(userAccount.Username, funcName, "122", methodUsed, endpoint, userCredentialByte, []byte(""), "Validation Failed", "Password Expired", nil)
 
-		sessionId := middleware.CreateAndStoreSessionId(userAccount.Username, funcName, methodUsed, endpoint, currentDateTime, userIP, userAccount.User_id, userCredentialByte)
-		if !sessionId.Data.IsSuccess {
-			return c.JSON(sessionId)
+		returnMessage := middleware.ResponseData(userAccount.Username, funcName, "122", methodUsed, endpoint, (userCredentialByte), []byte(""), "", nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
 		}
-		return c.JSON(response.ReturnModel{
-			RetCode: "122",
-			Message: "Validation Failed",
-			Data: errors.ErrorModel{
-				Message:    "Unlocked User Account",
-				User_id:    userAccount.User_id,
-				Session_id: sessionId.Data.Message,
-				Is_active:  true, // session id status
-			},
-		})
 	} // unlocked, correct inputted temporary credential, required reset password
 
 	// check if password is expired
@@ -236,20 +195,10 @@ func MainUserLogIn(c *fiber.Ctx) error {
 	if isPasswordExpired.Data.IsSuccess && isPasswordExpired.RetCode == "200" {
 		middleware.ActivityLogger(userAccount.Username, funcName, "102", methodUsed, endpoint, userCredentialByte, []byte(""), "Validation Failed", "Password Expired", nil)
 
-		sessionId := middleware.CreateAndStoreSessionId(userAccount.Username, funcName, methodUsed, endpoint, currentDateTime, userIP, userAccount.User_id, userCredentialByte)
-		if !sessionId.Data.IsSuccess {
-			return c.JSON(sessionId)
+		returnMessage := middleware.ResponseData(userAccount.Username, funcName, "102", methodUsed, endpoint, (userCredentialByte), []byte(""), "", nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
 		}
-		return c.JSON(response.ReturnModel{
-			RetCode: "102",
-			Message: "Validation Failed",
-			Data: errors.ErrorModel{
-				Message:    "Password Expired",
-				User_id:    userAccount.User_id,
-				Session_id: sessionId.Data.Message,
-				Is_active:  true, // session id status
-			},
-		})
 	}
 
 	// reset bad login attempt

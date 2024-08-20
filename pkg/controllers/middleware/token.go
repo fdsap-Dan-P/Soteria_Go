@@ -110,7 +110,6 @@ func ParseToken(tokenString, funcName, methodUsed, endpoint string) response.Ret
 			Message: "Successful",
 			Data: errors.ErrorModel{
 				Message:   string(claims.Username),
-				User_id:   claims.User_id,
 				Username:  claims.Username,
 				Staff_id:  claims.Staff_id,
 				IsSuccess: true,
