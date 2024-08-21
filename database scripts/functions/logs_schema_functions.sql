@@ -89,3 +89,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- insert to user's token
+CREATE OR REPLACE FUNCTION logs.recreate_token(
+        p_username TEXT,
+        p_staff_id TEXT,
+        p_token TEXT,
+        p_insti_code TEXT,
+        p_app_code TEXT
+)
+RETURNS TEXT AS $$
+DECLARE
+    v_error_message TEXT;
+BEGIN
+    BEGIN
+        INSERT INTO logs.user_tokens(username, staff_id, token, insti_code, app_code) VALUES (p_username, p_staff_id, p_token, p_insti_code, p_app_code);
+        RETURN 'Success';
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- Capture the error message
+            v_error_message := SQLERRM;
+            RETURN 'Inserting Data Failed: ' || v_error_message;
+    END;    
+END;
+$$ LANGUAGE plpgsql;

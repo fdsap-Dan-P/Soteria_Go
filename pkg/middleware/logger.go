@@ -12,7 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ActivityLogger(user string, endpointName string, retCode string, method string, endpoint string, requestBody []byte, responseBody []byte, message string, messagErr string, responsErr error) {
+func ActivityLogger(user string, instiCode, appCode, moduleName, funcName, retCode, method, endpoint string, requestBody []byte, responseBody []byte, message string, messagErr string, responsErr error) {
 	// Set log directory
 	logDir := "Logs"
 
@@ -22,7 +22,7 @@ func ActivityLogger(user string, endpointName string, retCode string, method str
 	}
 
 	// Create log directory for the endpoint
-	endpointDir := filepath.Join(logDir, endpointName)
+	endpointDir := filepath.Join(logDir, moduleName)
 	if _, err := os.Stat(endpointDir); os.IsNotExist(err) {
 		os.Mkdir(endpointDir, os.ModePerm)
 	}
@@ -46,7 +46,7 @@ func ActivityLogger(user string, endpointName string, retCode string, method str
 	}
 
 	// Create log file path
-	logFileName := fmt.Sprintf("%d-%s-%d-%s.log", year, month, day, endpointName)
+	logFileName := fmt.Sprintf("%d-%s-%d-%s.log", year, month, day, moduleName)
 	logFilePath := filepath.Join(monthDir, logFileName)
 
 	// Open log file
@@ -97,17 +97,20 @@ func ActivityLogger(user string, endpointName string, retCode string, method str
 	}
 	//logrus
 	toBeLog := LogStruct{
-		Level:         level,
-		Date:          fmt.Sprintf("%d-%s-%d", year, month, day),
-		Username:      user,
-		Retcode:       retCode,
-		Method:        method,
-		Endpoint:      endpoint,
-		Request_body:  req,
-		Response_body: resp,
-		Message:       message,
-		Error_message: messagErr,
-		Error:         responsErr,
+		Level:           level,
+		Date:            fmt.Sprintf("%d-%s-%d", year, month, day),
+		Functionality:   funcName,
+		User_identty:    user,
+		User_insti_code: instiCode,
+		App_code_used:   appCode,
+		Retcode:         retCode,
+		Method:          method,
+		Endpoint:        endpoint,
+		Request_body:    req,
+		Response_body:   resp,
+		Message:         message,
+		Error_message:   messagErr,
+		Error:           responsErr,
 	}
 
 	toBeLogByte, marshallErr := json.Marshal(toBeLog)
@@ -120,15 +123,18 @@ func ActivityLogger(user string, endpointName string, retCode string, method str
 }
 
 type LogStruct struct {
-	Level         string            `json:"level"`
-	Date          string            `json:"date"`
-	Username      string            `json:"username"`
-	Retcode       string            `json:"retcode"`
-	Method        string            `json:"method"`
-	Endpoint      string            `json:"endpoint"`
-	Request_body  map[string]string `json:"request_body"`
-	Response_body map[string]string `json:"response_body"`
-	Message       string            `json:"message"`
-	Error_message string            `json:"error_message"`
-	Error         error             `json:"error"`
+	Level           string            `json:"level"`
+	Date            string            `json:"date"`
+	Functionality   string            `json:"functionality"`
+	User_identty    string            `json:"user_identty"`
+	User_insti_code string            `json:"user_insti_code"`
+	App_code_used   string            `json:"app_code_used"`
+	Retcode         string            `json:"retcode"`
+	Method          string            `json:"method"`
+	Endpoint        string            `json:"endpoint"`
+	Request_body    map[string]string `json:"request_body"`
+	Response_body   map[string]string `json:"response_body"`
+	Message         string            `json:"message"`
+	Error_message   string            `json:"error_message"`
+	Error           error             `json:"error"`
 }

@@ -18,12 +18,6 @@ VALUES
 ('jwt', 'Token', 'Time', 'Minute', '1440', 'rbi', 'data-plaform'),
 ('jwt', 'Token', 'Time', 'Minute', '1440', 'rbi', 'cagabay'),
 
-('lockout_attempt', 'Password Lockout Attempt', 'Minimum login attempts', 'Numeric', '3', 'rbi', 'data-plaform'),
-('lockout_attempt', 'Password Lockout Attempt', 'Minimum login attempts', 'Numeric', '3', 'rbi', 'cagabay'),
-
-('lockout_period', 'Password Lockout Period', 'Lockout period in minutes', 'Numeric', '5', 'rbi', 'data-plaform'),
-('lockout_period', 'Password Lockout Period', 'Lockout period in minutes', 'Numeric', '5', 'rbi', 'cagabay')
-
 ('pass_exp', 'Password Expiration', 'Password Active Duration Starting Password Creation', 'Day', '90', 'rbi', 'data-plaform'),
 ('pass_exp', 'Password Expiration', 'Password Active Duration Starting Password Creation', 'Day', '90', 'rbi', 'cagabay'),
 

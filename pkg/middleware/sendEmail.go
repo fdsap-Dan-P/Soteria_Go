@@ -8,7 +8,9 @@ import (
 	"strconv"
 )
 
-func SendMail(receiver_name, receiver_email, subject, body, username, funcName, methodUsed, endpoint string, requestBodyBytes, responseBodyBytes []byte) response.ReturnModel {
+func SendMail(receiver_name, receiver_email, subject, body, username, instiCode, appCode, moduleName, methodUsed, endpoint string, requestBodyBytes, responseBodyBytes []byte) response.ReturnModel {
+	funcName := "Send Email"
+
 	// Email configuration
 	smtpServer := "smtp.gmail.com"
 	smtpPort := 587
@@ -28,13 +30,13 @@ func SendMail(receiver_name, receiver_email, subject, body, username, funcName, 
 	auth := smtp.PlainAuth("", senderEmail, senderPassword, smtpServer)
 	sendEmailErr := smtp.SendMail(smtpServer+":"+strconv.Itoa(smtpPort), auth, senderEmail, to, []byte(message))
 	if sendEmailErr != nil {
-		returnMessage := ResponseData(username, funcName, "315", methodUsed, endpoint, requestBodyBytes, []byte(""), "", sendEmailErr)
+		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "315", methodUsed, endpoint, requestBodyBytes, []byte(""), "", sendEmailErr)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
 	}
 
-	ActivityLogger(username, funcName, "200", methodUsed, endpoint, []byte(""), []byte(""), "Successful", "", nil)
+	ActivityLogger(username, instiCode, appCode, moduleName, funcName, "200", methodUsed, endpoint, []byte(""), []byte(""), "Successful", "", nil)
 	return response.ReturnModel{
 		RetCode: "200",
 		Message: "Successful",

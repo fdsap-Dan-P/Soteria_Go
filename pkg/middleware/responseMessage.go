@@ -6,11 +6,11 @@ import (
 	"soteria_go/pkg/utils/go-utils/database"
 )
 
-func ResponseData(username string, funcName string, retcode string, method string, endpoint string, reqBody []byte, respBsody []byte, specific_field string, error_message error) response.ReturnModel {
+func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, method, endpoint string, reqBody []byte, respBsody []byte, specific_field string, error_message error) response.ReturnModel {
 	respFromDB := response.RespFromDB{}
 	returnMessage := response.ReturnModel{}
 
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.return_message WHERE retcode = ?", retcode).Scan(&respFromDB).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM return_message WHERE retcode = ?", retcode).Scan(&respFromDB).Error; fetchErr != nil {
 		return response.ReturnModel{
 			RetCode: "302",
 			Message: "Internal Server Error",
@@ -46,6 +46,6 @@ func ResponseData(username string, funcName string, retcode string, method strin
 		returnMessage.Data.Error = error_message
 	}
 
-	ActivityLogger(username, funcName, retcode, method, endpoint, []byte(reqBody), []byte(""), returnMessage.Message, returnMessage.Data.Message, error_message)
+	ActivityLogger(username, instiCode, appCode, moduleName, funcName, retcode, method, endpoint, []byte(reqBody), []byte(""), returnMessage.Message, returnMessage.Data.Message, error_message)
 	return returnMessage
 }
