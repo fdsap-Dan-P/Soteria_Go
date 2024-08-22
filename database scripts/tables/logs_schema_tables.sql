@@ -1,4 +1,5 @@
 CREATE TABLE logs.user_tokens (
+        token_id serial primary key,
         username TEXT,
         staff_id TEXT, 
         token TEXT,

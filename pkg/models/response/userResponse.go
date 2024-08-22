@@ -17,6 +17,7 @@ type (
 		Birthdate               string `json:"birthdate,omitempty"`
 		Requires_password_reset bool   `json:"requires_password_reset,omitempty"`
 		Last_password_reset     string `json:"last_password_reset,omitempty"`
+		Token                   string `json:"token,omitempty"`
 	}
 
 	UserPasswordDetails struct {
@@ -26,5 +27,14 @@ type (
 		Last_password_reset     string `json:"last_password_reset"`
 		Created_at              string `json:"created_at"`
 		Updated_at              string `json:"updated_at"`
+	}
+
+	UserTokenDetails struct {
+		Token_id   int    `json:"token_id"`
+		Username   string `json:"username"`
+		Staff_id   string `json:"staff_id"`
+		Token      string `json:"token"`
+		Insti_code string `json:"insti_code"`
+		App_code   string `json:"app_code"`
 	}
 )
