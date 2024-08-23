@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"net/smtp"
-	"soteria_go/pkg/models/errors"
 	"soteria_go/pkg/models/response"
 	"strconv"
 )
@@ -40,7 +39,7 @@ func SendMail(receiver_name, receiver_email, subject, body, username, instiCode,
 	return response.ReturnModel{
 		RetCode: "200",
 		Message: "Successful",
-		Data: errors.ErrorModel{
+		Data: response.DataModel{
 			Message:   fmt.Sprintf("Mail Sent to: %s", receiver_name),
 			IsSuccess: true,
 			Error:     nil,

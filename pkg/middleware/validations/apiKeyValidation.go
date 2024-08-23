@@ -3,7 +3,6 @@ package validations
 import (
 	"encoding/json"
 	"soteria_go/pkg/middleware"
-	"soteria_go/pkg/models/errors"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
 	"strings"
@@ -47,7 +46,7 @@ func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUs
 
 	middleware.ActivityLogger(username, instiCode, appCode, moduleName, funcName, "200", methodUsed, endpoint, reqBody, appDetailsByte, "Successful", "", nil)
 
-	successResp := response.ReturnModel{Data: errors.ErrorModel{IsSuccess: true}}
+	successResp := response.ReturnModel{Data: response.DataModel{IsSuccess: true}}
 
 	return successResp, appDetails
 }

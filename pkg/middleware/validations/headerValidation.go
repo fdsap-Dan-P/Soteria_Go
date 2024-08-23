@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"soteria_go/pkg/middleware"
-	"soteria_go/pkg/models/errors"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
 )
@@ -76,7 +75,7 @@ func HeaderValidation(tokenString, apiKey, moduleName, funcName, methodUsed, end
 	// log the header validation
 	middleware.ActivityLogger(validationResponse.Username, validationResponse.Insti_code, validationResponse.App_code, moduleName, funcName, "215", methodUsed, endpoint, []byte(""), validationResponseByte, "Successfully Validated Headers", "", nil)
 
-	successResp := response.ReturnModel{Data: errors.ErrorModel{IsSuccess: true}}
+	successResp := response.ReturnModel{Data: response.DataModel{IsSuccess: true}}
 
 	return successResp, validationResponse
 }

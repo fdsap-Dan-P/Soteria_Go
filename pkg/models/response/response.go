@@ -1,17 +1,22 @@
 package response
 
-import "soteria_go/pkg/models/errors"
-
 type ResponseModel struct {
 	RetCode string      `json:"retCode"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
 
+type DataModel struct {
+	Message   string `json:"message"`
+	IsSuccess bool   `json:"isSuccess"`
+	Error     error  `json:"error,omitempty"`
+	// Details   interface{} `json:"details,omitempty"`
+}
+
 type ReturnModel struct {
-	RetCode string            `json:"retCode"`
-	Message string            `json:"message"`
-	Data    errors.ErrorModel `json:"data,omitempty"`
+	RetCode string    `json:"retCode"`
+	Message string    `json:"message"`
+	Data    DataModel `json:"data,omitempty"`
 }
 
 type DBFuncResponse struct {

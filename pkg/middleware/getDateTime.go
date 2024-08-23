@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"soteria_go/pkg/models/errors"
 	"soteria_go/pkg/models/response"
 	"time"
 )
@@ -31,7 +30,7 @@ func GetDateTime() response.ReturnModel {
 	return response.ReturnModel{
 		RetCode: "200",
 		Message: "Successful",
-		Data: errors.ErrorModel{
+		Data: response.DataModel{
 			Message:   formattedTime,
 			IsSuccess: true,
 			Error:     nil,

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"soteria_go/pkg/models/errors"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
 	"strconv"
@@ -105,7 +104,7 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 		return response.ReturnModel{
 			RetCode: "200",
 			Message: string(claims.Username),
-			Data: errors.ErrorModel{
+			Data: response.DataModel{
 				Message:   string(claims.Insti_code),
 				IsSuccess: true,
 				Error:     nil,
@@ -173,7 +172,7 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 	return response.ReturnModel{
 		RetCode: "200",
 		Message: "",
-		Data: errors.ErrorModel{
+		Data: response.DataModel{
 			Message:   "",
 			IsSuccess: true,
 			Error:     nil,

@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"soteria_go/pkg/middleware"
-	"soteria_go/pkg/models/errors"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
 
@@ -100,7 +99,7 @@ func HcisInquiry(username, instiCode, appCode, moduleName, methodUsed, endpoint 
 	middleware.ActivityLogger(username, userHCISDetails.Institution_code, appCode, moduleName, funcName, "200", methodUsed, endpoint, reqBody, userHCISDetailsByte, "Success", "", nil)
 
 	successResponse := response.ReturnModel{
-		Data: errors.ErrorModel{IsSuccess: true},
+		Data: response.DataModel{IsSuccess: true},
 	}
 	return successResponse, userHCISDetails
 }

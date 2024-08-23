@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"soteria_go/pkg/models/errors"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
 )
@@ -14,7 +13,7 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 		return response.ReturnModel{
 			RetCode: "302",
 			Message: "Internal Server Error",
-			Data: errors.ErrorModel{
+			Data: response.DataModel{
 				Message:   "Fetching Data Failed",
 				IsSuccess: false,
 				Error:     fetchErr,
@@ -25,7 +24,7 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 		return response.ReturnModel{
 			RetCode: "404",
 			Message: "Bad Request",
-			Data: errors.ErrorModel{
+			Data: response.DataModel{
 				Message:   "Ret Code Not Found",
 				IsSuccess: false,
 				Error:     nil,
