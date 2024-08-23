@@ -37,4 +37,12 @@ type (
 		Insti_code string `json:"insti_code"`
 		App_code   string `json:"app_code"`
 	}
+
+	HeaderValidationResponse struct {
+		Username   string `json:"username"`
+		Insti_code string `json:"insti_code"`
+		Insti_name string `json:"insti_name"`
+		App_code   string `json:"app_code"`
+		App_name   string `json:"app_name"`
+	}
 )

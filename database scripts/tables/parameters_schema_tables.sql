@@ -73,7 +73,7 @@ INSERT INTO parameters.return_message(
     ('113', 'Validation Failed', 'Password Reuse Prohibited', false), -- should be dynamic
     ('114', 'Validation Failed', 'User Lockout Period', false),
     ('115', 'Validation Failed', 'Session Id Missing', false),
-    ('116', 'Validation Failed', 'Email Reuse Prohibited', false), -- replace
+    ('116', 'Validation Failed', 'Terminated OTP', false), -- replace
     ('117', 'Validation Failed', 'Invalid OTP', false),
     ('118', 'Validation Failed', 'Expired OTP', false),
     ('119', 'Validation Failed', 'Password Not Match', false),
@@ -99,6 +99,7 @@ INSERT INTO parameters.return_message(
     ('212', 'Successfully Deactivate User Account', '', NULL ),
     ('213', 'Successfully Unblock User Account', '', NULL ),
     ('214', 'Successfully Unlock User Account', '', NULL ),
+    ('214', 'Successfully Validated Headers', '', NULL ),
     ('300', 'Internal Server Error', '', false),
     ('301', 'Internal Server Error', 'Parsing Data Failed', false),
     ('302', 'Internal Server Error', 'Fetching Data Failed', false),

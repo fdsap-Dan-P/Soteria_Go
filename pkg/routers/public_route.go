@@ -2,6 +2,8 @@ package routers
 
 import (
 	"soteria_go/pkg/controllers/healthchecks"
+	securitymanagement "soteria_go/pkg/controllers/security-management"
+	userlogs "soteria_go/pkg/controllers/user-logs"
 	registernewuser "soteria_go/pkg/controllers/user-management/register-new-user"
 
 	"github.com/gofiber/fiber/v2"
@@ -29,11 +31,16 @@ func SetupPublicRoutes(app *fiber.App) {
 	auth := v1Endpoint.Group("/auth")
 
 	//--- U S E R    L O G S ---//
-	// userLogs := v1Endpoint.Group("/user-logs")
+	userLogs := auth.Group("/user-logs")
+	userLogs.Get("/login", userlogs.Login)
 
 	//--- U S E R    M A N A G E M E N T ---//
 	userManagement := auth.Group("/user-management")
 	userManagement.Post("/register-new-user", registernewuser.RegisterUser)
+
+	//--- S E C U R I T Y    M A N A G E M E N T ---//
+	secManagement := auth.Group("/security-management")
+	secManagement.Get("/validate-header", securitymanagement.ThirdPartyHeaderValidation)
 
 }
 
