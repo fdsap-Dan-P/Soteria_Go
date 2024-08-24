@@ -33,7 +33,7 @@ func HcisInquiry(username, instiCode, appCode, moduleName, methodUsed, endpoint 
 		Post("https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo")
 
 	if respErr != nil {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "317", methodUsed, endpoint, reqBody, []byte(""), "Reading HCIS Response Failed", respErr)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "317", methodUsed, endpoint, reqBody, []byte(""), "Reading HCIS Response Failed", respErr, resp)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}
@@ -41,14 +41,14 @@ func HcisInquiry(username, instiCode, appCode, moduleName, methodUsed, endpoint 
 
 	// Unmarshal the response body into the struct
 	if unmarshallErr := json.Unmarshal(resp.Body(), &userHCISInfo); unmarshallErr != nil {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "310", methodUsed, endpoint, reqBody, []byte(""), "", unmarshallErr)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "310", methodUsed, endpoint, reqBody, []byte(""), "", unmarshallErr, unmarshallErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}
 	}
 
 	if len(userHCISInfo.StaffInfo) == 0 {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "404", methodUsed, endpoint, reqBody, []byte(""), "Staff ID Not Found in HCIS", nil)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "404", methodUsed, endpoint, reqBody, []byte(""), "Staff ID Not Found in HCIS", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}
@@ -68,7 +68,7 @@ func HcisInquiry(username, instiCode, appCode, moduleName, methodUsed, endpoint 
 
 	// check if user institution is already in database
 	if fetchErr := database.DBConn.Raw("SELECT * FROM public.institutions WHERE institution_name = ?", userHCISDetails.Institution_name).First(&instiDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}
@@ -77,7 +77,7 @@ func HcisInquiry(username, instiCode, appCode, moduleName, methodUsed, endpoint 
 	if instiDetails.Institution_id == 0 {
 		userHCISDetails.Institution_code = GenerateInstitutionCode(userHCISDetails.Institution_name, username, instiCode, appCode, moduleName, methodUsed, endpoint)
 		if insErr := database.DBConn.Raw("INSERT INTO public.institutions (institution_name, institution_code) VALUES (?, ?) RETURNING *", userHCISDetails.Institution_name, userHCISDetails.Institution_code).Scan(&instiDetails).Error; insErr != nil {
-			returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", insErr)
+			returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", insErr, insErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return returnMessage, userHCISDetails
 			}
@@ -89,7 +89,7 @@ func HcisInquiry(username, instiCode, appCode, moduleName, methodUsed, endpoint 
 	// marshal the response struct
 	userHCISDetailsByte, marshalErr := json.Marshal(userHCISDetails)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "311", methodUsed, endpoint, reqBody, []byte(""), "", marshalErr)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "311", methodUsed, endpoint, reqBody, []byte(""), "", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}

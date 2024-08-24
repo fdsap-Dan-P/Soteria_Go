@@ -66,7 +66,7 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 
 	// check if token string has value
 	if strings.TrimSpace(tokenString) == "" {
-		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "401", methodUsed, endpoint, []byte(tokenString), []byte(""), "Token Missing", fmt.Errorf("token null"))
+		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "401", methodUsed, endpoint, []byte(tokenString), []byte(""), "Token Missing", fmt.Errorf("token null"), nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
@@ -79,20 +79,20 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 		// Check if the error is due to token expiration
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				returnMessage := ResponseData("", "", appCode, moduleName, funcName, "110", methodUsed, endpoint, []byte(tokenString), []byte(""), "", ve)
+				returnMessage := ResponseData("", "", appCode, moduleName, funcName, "110", methodUsed, endpoint, []byte(tokenString), []byte(""), "", ve, nil)
 				if !returnMessage.Data.IsSuccess {
 					return (returnMessage)
 				}
 			}
 		}
-		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "301", methodUsed, endpoint, []byte(tokenString), []byte(""), "", err)
+		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "301", methodUsed, endpoint, []byte(tokenString), []byte(""), "", err, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
 	}
 
 	if !token.Valid {
-		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf(tokenString))
+		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf(tokenString), token)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
@@ -112,7 +112,7 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 		}
 	}
 
-	returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf(tokenString))
+	returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf(tokenString), token)
 	if !returnMessage.Data.IsSuccess {
 		return (returnMessage)
 	}
@@ -127,14 +127,14 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 
 	// check if token string has value
 	if strings.TrimSpace(tokenString) == "" {
-		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "401", methodUsed, endpoint, []byte(tokenString), []byte(""), "New Generated Token Missing", fmt.Errorf("token null"))
+		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "401", methodUsed, endpoint, []byte(tokenString), []byte(""), "New Generated Token Missing", fmt.Errorf("token null"), nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
 	}
 
 	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_tokens WHERE (user_name = ? OR staff_id = ?) AND insti_code = ? AND app_code = ?", username, staffId, instiCode, appCode).Scan(&userTokenDetails).Error; fetchErr != nil {
-		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr)
+		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
@@ -142,28 +142,28 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 
 	if userTokenDetails.Token_id == 0 {
 		if insErr := database.DBConn.Raw("SELECT logs.create_user_token(?, ?, ?, ?, ?) AS remark", username, staffId, tokenString, instiCode, appCode).Scan(&remark).Error; insErr != nil {
-			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", insErr)
+			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", insErr, insErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
 			}
 		}
 
 		if remark.Remark != "Success" {
-			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", fmt.Errorf(remark.Remark))
+			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", fmt.Errorf(remark.Remark), remark)
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
 			}
 		}
 	} else {
 		if updErr := database.DBConn.Raw("SELECT logs.update_user_token(?, ?, ?, ?, ?) AS remark", tokenString, username, staffId, staffId, appCode).Scan(&remark).Error; updErr != nil {
-			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "304", methodUsed, endpoint, reqBody, []byte(""), "", updErr)
+			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "304", methodUsed, endpoint, reqBody, []byte(""), "", updErr, updErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
 			}
 		}
 
 		if remark.Remark != "Success" {
-			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "304", methodUsed, endpoint, reqBody, []byte(""), "", fmt.Errorf(remark.Remark))
+			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "304", methodUsed, endpoint, reqBody, []byte(""), "", fmt.Errorf(remark.Remark), remark)
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
 			}

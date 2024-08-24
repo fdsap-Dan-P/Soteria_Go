@@ -5,7 +5,7 @@ import (
 	"soteria_go/pkg/utils/go-utils/database"
 )
 
-func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, method, endpoint string, reqBody []byte, respBsody []byte, specific_field string, error_message error) response.ReturnModel {
+func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, method, endpoint string, reqBody []byte, respBsody []byte, specific_field string, error_message error, details interface{}) response.ReturnModel {
 	respFromDB := response.RespFromDB{}
 	returnMessage := response.ReturnModel{}
 

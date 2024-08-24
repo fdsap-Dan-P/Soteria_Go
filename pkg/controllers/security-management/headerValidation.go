@@ -22,7 +22,7 @@ func ThirdPartyHeaderValidation(c *fiber.Ctx) error {
 	tokenString := strings.TrimSpace(token)
 
 	if strings.TrimSpace(authHeader) == "" || tokenString == "" {
-		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "111", methodUsed, endpoint, []byte(""), []byte(""), "", nil)
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "111", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -39,7 +39,7 @@ func ThirdPartyHeaderValidation(c *fiber.Ctx) error {
 	// marshal the response
 	headerValidationResponseByte, marshalErr := json.Marshal(headerValidationResponse)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Response Failed", marshalErr)
+		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Response Failed", marshalErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}

@@ -29,7 +29,7 @@ func SendMail(receiver_name, receiver_email, subject, body, username, instiCode,
 	auth := smtp.PlainAuth("", senderEmail, senderPassword, smtpServer)
 	sendEmailErr := smtp.SendMail(smtpServer+":"+strconv.Itoa(smtpPort), auth, senderEmail, to, []byte(message))
 	if sendEmailErr != nil {
-		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "315", methodUsed, endpoint, requestBodyBytes, []byte(""), "", sendEmailErr)
+		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "315", methodUsed, endpoint, requestBodyBytes, []byte(""), "", sendEmailErr, sendEmailErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}

@@ -2,7 +2,6 @@ package validations
 
 import (
 	"encoding/json"
-	"fmt"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
@@ -26,14 +25,14 @@ func HeaderValidation(tokenString, apiKey, moduleName, funcName, methodUsed, end
 
 	// check if token was stored
 	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_tokens WHERE (username = ? OR staff_id = ?) AND token = ? AND insti_code = ? AND app_code = ?", tokenValidatedStatus.Message, tokenValidatedStatus.Message, tokenString, tokenValidatedStatus.Data.Message, appDetails.Application_code).Scan(&userTokenDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr)
+		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, validationResponse
 		}
 	}
 
 	if userTokenDetails.Token_id == 0 {
-		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "116", methodUsed, endpoint, []byte(""), []byte(""), "", nil)
+		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "116", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, validationResponse
 		}
@@ -41,14 +40,14 @@ func HeaderValidation(tokenString, apiKey, moduleName, funcName, methodUsed, end
 
 	// Get Branch Details
 	if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_code = ?", tokenValidatedStatus.Data.Message).Scan(&instiDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr)
+		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, validationResponse
 		}
 	}
 
 	if instiDetails.Institution_id == 0 {
-		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "Institution Not Found", fmt.Errorf(tokenValidatedStatus.Data.Message))
+		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "Institution Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, validationResponse
 		}
@@ -66,7 +65,7 @@ func HeaderValidation(tokenString, apiKey, moduleName, funcName, methodUsed, end
 	// marshal the response
 	validationResponseByte, marshalErr := json.Marshal(validationResponse)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Response Failed", marshalErr)
+		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Response Failed", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, validationResponse
 		}
