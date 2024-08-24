@@ -132,12 +132,10 @@ func RegisterUser(c *fiber.Ctx) error {
 		return c.JSON(sendEmailErr)
 	}
 
-	// Log the activity
-	middleware.ActivityLogger(UserDetails.Username, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, funcName, "200", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successful", "", nil)
+	returnMessage := middleware.ResponseData(UserDetails.Username, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, UserDetails)
+	if !returnMessage.Data.IsSuccess {
+		return c.JSON(returnMessage)
+	}
 
-	return c.JSON(response.ResponseModel{
-		RetCode: "203",
-		Message: "User Successfully Registered",
-		Data:    UserDetails,
-	})
+	return c.JSON(returnMessage)
 }

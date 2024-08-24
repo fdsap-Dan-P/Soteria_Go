@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/middleware/validations"
-	"soteria_go/pkg/models/response"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -45,12 +44,10 @@ func ThirdPartyHeaderValidation(c *fiber.Ctx) error {
 		}
 	}
 
-	// log the header validation
-	middleware.ActivityLogger(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "215", methodUsed, endpoint, []byte(""), headerValidationResponseByte, "Successfully Validated Headers", "", nil)
+	returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "215", methodUsed, endpoint, []byte(""), headerValidationResponseByte, "", nil, headerValidationResponse)
+	if !returnMessage.Data.IsSuccess {
+		return c.JSON(returnMessage)
+	}
 
-	return c.JSON(response.ResponseModel{
-		RetCode: "215",
-		Message: "Successfully Validated Token",
-		Data:    headerValidationResponse,
-	})
+	return c.JSON(returnMessage)
 }

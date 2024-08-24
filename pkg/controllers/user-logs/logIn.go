@@ -126,12 +126,10 @@ func Login(c *fiber.Ctx) error {
 		}
 	}
 
-	// log the user in
-	middleware.ActivityLogger(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "201", methodUsed, endpoint, credentialRequestByte, userDetailsByte, "Successfully Logged In", "", nil)
+	returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "201", methodUsed, endpoint, credentialRequestByte, userDetailsByte, "", nil, userDetails)
+	if !returnMessage.Data.IsSuccess {
+		return c.JSON(returnMessage)
+	}
 
-	return c.JSON(response.ResponseModel{
-		RetCode: "201",
-		Message: "Successfully Logged In",
-		Data:    userDetails,
-	})
+	return c.JSON(returnMessage)
 }
