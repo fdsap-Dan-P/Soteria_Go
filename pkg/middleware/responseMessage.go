@@ -17,6 +17,7 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 				Message:   "Fetching Data Failed",
 				IsSuccess: false,
 				Error:     fetchErr,
+				Details:   fetchErr,
 			},
 		}
 	}
@@ -28,6 +29,7 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 				Message:   "Ret Code Not Found",
 				IsSuccess: false,
 				Error:     nil,
+				Details:   nil,
 			},
 		}
 	}
@@ -43,6 +45,10 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 
 	if error_message != nil {
 		returnMessage.Data.Error = error_message
+	}
+
+	if details != nil {
+		returnMessage.Data.Details = details
 	}
 
 	ActivityLogger(username, instiCode, appCode, moduleName, funcName, retcode, method, endpoint, []byte(reqBody), []byte(""), returnMessage.Message, returnMessage.Data.Message, error_message)

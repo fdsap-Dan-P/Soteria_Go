@@ -7,10 +7,10 @@ type ResponseModel struct {
 }
 
 type DataModel struct {
-	Message   string `json:"message"`
-	IsSuccess bool   `json:"isSuccess"`
-	Error     error  `json:"error,omitempty"`
-	// Details   interface{} `json:"details,omitempty"`
+	Message   string      `json:"message"`
+	IsSuccess bool        `json:"isSuccess"`
+	Error     error       `json:"error,omitempty"`
+	Details   interface{} `json:"details,omitempty"`
 }
 
 type ReturnModel struct {
