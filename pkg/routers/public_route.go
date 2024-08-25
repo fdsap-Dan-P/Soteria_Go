@@ -41,6 +41,7 @@ func SetupPublicRoutes(app *fiber.App) {
 	//--- S E C U R I T Y    M A N A G E M E N T ---//
 	secManagement := auth.Group("/security-management")
 	secManagement.Get("/validate-header", securitymanagement.ThirdPartyHeaderValidation)
+	secManagement.Post("/register-application", securitymanagement.AppRegistration)
 
 }
 
