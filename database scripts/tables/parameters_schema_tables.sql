@@ -5,6 +5,12 @@ create table parameters.system_config(
     config_name text not null,
     config_description text null,
     config_type text,
+    created_at timestamp default current_timestamp,
+    updated_at_at timestamp default current_timestamp
+);
+
+create table parameters.insti_app_config(
+    config_id int references parameters.system_config(config_id) on delete cascade,
     config_value text not null,
     config_insti_code text,
     config_app_code text,

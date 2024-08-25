@@ -25,7 +25,7 @@ func GenerateToken(username, instiCode, appCode, moduleName, methodUsed, endpoin
 	funcName := "Generate Token"
 
 	configResponse := response.ConfigDetails{}
-	if err := database.DBConn.Raw("SELECT * FROM system_config WHERE config_code = 'jwt' AND insti_code = ? AND app_code = ?", instiCode, appCode).Scan(&configResponse).Error; err != nil {
+	if err := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = 'jwt' AND insti_code = ? AND app_code = ?", instiCode, appCode).Scan(&configResponse).Error; err != nil {
 		return "", err
 	}
 
