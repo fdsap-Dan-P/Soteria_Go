@@ -25,7 +25,7 @@ create table public.user_passwords (
 
 -- tables for applications 
 create table public.applications (
-	applicayion_id serial primary key,
+	application_id serial primary key,
 	application_code text not null,
 	application_name text not null,
 	application_description text null,

@@ -2,7 +2,7 @@ package response
 
 type (
 	ApplicationDetails struct {
-		App_id                  int    `json:"app_id,omitempty"`
+		Application_id          int    `json:"application_id"`
 		Application_code        string `json:"app_code"`
 		Application_name        string `json:"application_name"`
 		Application_description string `json:"application_description"`

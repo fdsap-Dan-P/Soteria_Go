@@ -28,7 +28,7 @@ func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUs
 		}
 	}
 
-	if appDetails.App_id == 0 {
+	if appDetails.Application_id == 0 {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "401", methodUsed, endpoint, reqBody, []byte(""), "API Key Authorization Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, appDetails

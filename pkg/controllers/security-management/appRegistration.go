@@ -2,6 +2,7 @@ package securitymanagement
 
 import (
 	"encoding/json"
+	"fmt"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/request"
 	"soteria_go/pkg/models/response"
@@ -46,14 +47,16 @@ func AppRegistration(c *fiber.Ctx) error {
 	}
 
 	// check if app name already exists
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.applications WHERE application_name = ?", newAppRequest.App_name).Scan(&appDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.applications WHERE application_name = ?", newAppRequest.App_name).Scan(&appDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "302", methodUsed, endpoint, newAppRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	if appDetails.App_id != 0 {
+	fmt.Println(appDetails.Application_id)
+
+	if appDetails.Application_id != 0 {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "403", methodUsed, endpoint, newAppRequestByte, []byte(""), "Application Name Already Exists", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -81,7 +84,7 @@ func AppRegistration(c *fiber.Ctx) error {
 	}
 
 	// remove app id as return
-	appDetails.App_id = 0
+	appDetails.Application_id = 0
 
 	// marshal the response
 	appDetailsByte, marshalErr := json.Marshal(appDetails)

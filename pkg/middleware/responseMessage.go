@@ -9,7 +9,7 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 	respFromDB := response.RespFromDB{}
 	returnMessage := response.ReturnModel{}
 
-	if fetchErr := database.DBConn.Raw("SELECT * FROM return_message WHERE retcode = ?", retcode).Scan(&respFromDB).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.return_message WHERE retcode = ?", retcode).Scan(&respFromDB).Error; fetchErr != nil {
 		return response.ReturnModel{
 			RetCode: "302",
 			Message: "Internal Server Error",
