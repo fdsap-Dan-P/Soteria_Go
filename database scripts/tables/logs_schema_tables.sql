@@ -3,7 +3,7 @@ CREATE TABLE logs.user_tokens (
         username TEXT,
         staff_id TEXT, 
         token TEXT,
-        insti_code TEXT references offices_mapping.institutions(institution_code) on delete cascade,
-        app_code TEXT references public.applications(app_code) on delete cascade,
+        insti_code TEXT,
+        app_code TEXT,
         created_at timestamp default current_timestamp,
 );

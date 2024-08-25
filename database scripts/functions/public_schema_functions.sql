@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION public.register_user(
         p_email TEXT,
         p_phone_no TEXT,
         p_staff_id TEXT,
-        p_institution_id INT
+        p_institution_id INT,
 
         p_password_hash TEXT,
         p_requires_password_reset BOOLEAN,

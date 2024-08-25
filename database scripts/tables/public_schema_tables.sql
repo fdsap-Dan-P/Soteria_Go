@@ -33,9 +33,3 @@ create table public.applications (
 	created_at timestamp default current_timestamp,
 	updated_at timestamp default current_timestamp
 );
-
-insert into public.applications
-	(app_code, app_name, app_description) 
-	values
-	('data-platform', 'Data Platform', 'Data Platform Web Application for Reports'),
-	('cagabay', 'Cagabay', 'Cagabay Mobile Application')

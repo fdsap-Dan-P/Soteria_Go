@@ -1,15 +1,15 @@
 -- system paramters 
-create table paramaters.system_config(
+create table parameters.system_config(
     config_id serial primary key,
     config_code text not null,
     config_name text not null,
     config_description text null,
     config_type text,
     config_value text not null,
-    config_insti_code text references offices_mapping.institutions(institution_code) not null,
-    config_app_code text references public.applications(application_code) not null,
+    config_insti_code text,
+    config_app_code text,
     created_at timestamp default current_timestamp,
-    updated_at_at timestamp default current_timestamp,
+    updated_at_at timestamp default current_timestamp
 );
 
 insert into parameters.system_config
