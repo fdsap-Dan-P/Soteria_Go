@@ -5,12 +5,23 @@ import (
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
+	"strings"
 )
 
-func HeaderValidation(tokenString, apiKey, moduleName, funcName, methodUsed, endpoint string) (response.ReturnModel, response.HeaderValidationResponse) {
+func HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint string) (response.ReturnModel, response.HeaderValidationResponse) {
 	validationResponse := response.HeaderValidationResponse{}
 	userTokenDetails := response.UserTokenDetails{}
 	instiDetails := response.InstitutionDetails{}
+
+	token := strings.TrimPrefix(authHeader, "Bearer")
+	tokenString := strings.TrimSpace(token)
+
+	if strings.TrimSpace(authHeader) == "" || tokenString == "" {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "111", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return returnMessage, validationResponse
+		}
+	}
 
 	// validate token
 	tokenValidatedStatus := middleware.ParseToken(tokenString, "", moduleName, methodUsed, endpoint)

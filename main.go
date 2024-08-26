@@ -16,13 +16,13 @@ import (
 
 func main() {
 
-	err := godotenv.Load("project_env_files/.env")
+	err := godotenv.Load("project-env-files/.env")
 	if err != nil {
 		log.Fatal("Error Loading Env File: ", err)
 	}
 	envi := os.Getenv("ENVIRONMENT")
 
-	err = godotenv.Load(fmt.Sprintf("project_env_files/.env-%v", envi)) //
+	err = godotenv.Load(fmt.Sprintf("project-env-files/.env-%v", envi)) //
 	if err != nil {
 		log.Fatal("Error Loading Env File: ", err)
 	}

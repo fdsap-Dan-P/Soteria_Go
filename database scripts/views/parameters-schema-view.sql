@@ -1,4 +1,4 @@
-create or replace view parameters.system_config_parameters as
+create or replace view parameters.system_config_params as
 select
     sc.config_id,
     sc.config_code,

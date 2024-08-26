@@ -3,6 +3,7 @@ package routers
 import (
 	"soteria_go/pkg/controllers/healthchecks"
 	securitymanagement "soteria_go/pkg/controllers/security-management"
+	setparameters "soteria_go/pkg/controllers/security-management/set-parameters"
 	userlogs "soteria_go/pkg/controllers/user-logs"
 	registernewuser "soteria_go/pkg/controllers/user-management/register-new-user"
 
@@ -43,6 +44,9 @@ func SetupPublicRoutes(app *fiber.App) {
 	secManagement.Get("/validate-header", securitymanagement.ThirdPartyHeaderValidation)
 	v1Endpoint.Post("/register-application", securitymanagement.AppRegistration) // no validation
 
+	// Set Parameters
+	setParams := secManagement.Group("/parameters")
+	setParams.Post("/:config_code", setparameters.SetParams)
 }
 
 func SetupPublicRoutesB(app *fiber.App) {

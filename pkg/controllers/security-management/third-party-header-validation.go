@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/middleware/validations"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,20 +16,10 @@ func ThirdPartyHeaderValidation(c *fiber.Ctx) error {
 
 	// Extract JWT token from Authorization header
 	authHeader := c.Get("Authorization")
-	token := strings.TrimPrefix(authHeader, "Bearer")
-	tokenString := strings.TrimSpace(token)
-
-	if strings.TrimSpace(authHeader) == "" || tokenString == "" {
-		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "111", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
 	apiKey := c.Get("X-API-Key")
 
 	// validate the header
-	headerValidationStatus, headerValidationResponse := validations.HeaderValidation(tokenString, apiKey, moduleName, funcName, methodUsed, endpoint)
+	headerValidationStatus, headerValidationResponse := validations.HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint)
 	if !headerValidationStatus.Data.IsSuccess {
 		return c.JSON(headerValidationStatus)
 	}
