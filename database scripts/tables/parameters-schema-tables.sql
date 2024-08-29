@@ -89,7 +89,7 @@ INSERT INTO parameters.return_message(
     ('123', 'Validation Failed', 'Inactive User Account', false), -- dynamic
     ('124', 'Validation Failed', 'Device Currently in Use by Another User', false),
     ('125', 'Validation Failed', 'Role In Use', false),
-    ('126', 'Validation Failed', 'Unlocked: Temporary Password Sent', false),
+    ('126', 'Validation Failed', 'Temporary Password Sent Not Used', false),
     ('200', 'Successful', '', true),
     ('201', 'Successful', 'Successfully Logged In', true),
     ('202', 'Successful', 'Successfully Logged Out', true),

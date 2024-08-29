@@ -81,7 +81,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// check if password is valid
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_passwords WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", credentialRequest.User_identity, credentialRequest.Password).Scan(&userPasswordDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_passwords WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", userDetails.User_id).Scan(&userPasswordDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, credentialRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -89,8 +89,15 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	hashPasswordRequest := hash.SHA256(credentialRequest.Password)
-	if userPasswordDetails.User_id == 0 || hashPasswordRequest != userPasswordDetails.Password_hash {
+	if userPasswordDetails.User_id == 0 {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Not Found", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if userPasswordDetails.Password_hash != hashPasswordRequest && strings.TrimSpace(userPasswordDetails.Last_password_reset) == "" && userPasswordDetails.Requires_password_reset {
+		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "126", methodUsed, endpoint, credentialRequestByte, []byte(""), "", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}

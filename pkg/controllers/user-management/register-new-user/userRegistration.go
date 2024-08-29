@@ -115,6 +115,14 @@ func RegisterUser(c *fiber.Ctx) error {
 		}
 	}
 
+	// validate if staff id already exists
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ?", newUserRequest.Staff_id, newUserRequest.Username).Scan(&UserDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
 	// marshal the response body
 	UserDetailsByte, marshalErr := json.Marshal(UserDetails)
 	if marshalErr != nil {
