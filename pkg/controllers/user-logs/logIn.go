@@ -88,9 +88,8 @@ func Login(c *fiber.Ctx) error {
 		}
 	}
 
-	hashPasswordRequest := hash.SHA256(credentialRequest.Password)
-	if userPasswordDetails.User_id == 0 || userPasswordDetails.Password_hash != hashPasswordRequest {
-		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Not Found", nil, userPasswordDetails)
+	if userPasswordDetails.User_id == 0 {
+		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -99,6 +98,14 @@ func Login(c *fiber.Ctx) error {
 	// append password details to user details
 	userDetails.Requires_password_reset = userPasswordDetails.Requires_password_reset
 	userDetails.Last_password_reset = userPasswordDetails.Last_password_reset
+
+	hashPasswordRequest := hash.SHA256(credentialRequest.Password)
+	if userPasswordDetails.User_id == 0 || userPasswordDetails.Password_hash != hashPasswordRequest {
+		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Not Found", nil, userDetails)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
 
 	// generate the jwt token
 	token, tokenErr := middleware.GenerateToken(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint)
