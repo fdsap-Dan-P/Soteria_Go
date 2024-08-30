@@ -6,21 +6,38 @@ import (
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 )
 
-func HcisInquiry(username, instiCode, appCode, moduleName, methodUsed, endpoint string, reqBody []byte) (response.ReturnModel, response.UserDetails) {
+func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, endpoint string, reqBody []byte) (response.ReturnModel, response.UserDetails) {
 	userHCISDetails := response.UserDetails{}
 	userHCISInfo := response.StaffInfoResponse{}
 	instiDetails := response.InstitutionDetails{}
 
 	funcName := "HCIS Inquiry"
 
+	if strings.TrimSpace(staffId) == "" {
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "401", methodUsed, endpoint, reqBody, []byte(""), "Staff Id Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return returnMessage, userHCISDetails
+		}
+	}
+
 	// Basic auth credentials
 	hcis_username := "fdsap_apis"
 	hcis_password := "P@ssword123"
 	hcis_authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(hcis_username+":"+hcis_password))
+
+	hcis_reqBody := map[string]string{"StaffId": staffId}
+	hcis_reqBodyByte, marshallErr := json.Marshal(hcis_reqBody)
+	if marshallErr != nil {
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "311", methodUsed, endpoint, reqBody, []byte(""), "Marshalling HCIS Request Failed", marshallErr, hcis_reqBody)
+		if !returnMessage.Data.IsSuccess {
+			return returnMessage, userHCISDetails
+		}
+	}
 
 	// Create a new Resty client
 	client := resty.New()
@@ -29,7 +46,7 @@ func HcisInquiry(username, instiCode, appCode, moduleName, methodUsed, endpoint 
 	resp, respErr := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("Authorization", hcis_authHeader).
-		SetBody(reqBody).
+		SetBody(hcis_reqBodyByte).
 		Post("https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo")
 
 	if respErr != nil {

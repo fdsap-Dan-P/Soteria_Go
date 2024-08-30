@@ -90,7 +90,7 @@ func RegisterUser(c *fiber.Ctx) error {
 	}
 
 	// get hcis details
-	hcisResponseStatus, hcisResponseDeatails := HcisInquiry(newUserRequest.Username, "", "", "User Registration", methodUsed, endpoint, newUserRequestByte)
+	hcisResponseStatus, hcisResponseDeatails := HcisInquiry(newUserRequest.Staff_id, newUserRequest.Username, "", "", "User Registration", methodUsed, endpoint, newUserRequestByte)
 	if !hcisResponseStatus.Data.IsSuccess {
 		return c.JSON(hcisResponseStatus)
 	}

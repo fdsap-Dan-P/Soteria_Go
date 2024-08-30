@@ -37,6 +37,7 @@ func SetupPublicRoutes(app *fiber.App) {
 
 	//--- U S E R    M A N A G E M E N T ---//
 	userManagement := auth.Group("/user-management")
+	userManagement.Post("/hcis-inquiry", registernewuser.HCISUserDetailsProvider)
 	userManagement.Post("/register-new-user", registernewuser.RegisterUser)
 
 	//--- S E C U R I T Y    M A N A G E M E N T ---//
