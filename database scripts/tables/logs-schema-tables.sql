@@ -5,5 +5,5 @@ CREATE TABLE logs.user_tokens (
         token TEXT,
         insti_code TEXT,
         app_code TEXT,
-        created_at timestamp default current_timestamp,
+        created_at timestamp default current_timestamp
 );

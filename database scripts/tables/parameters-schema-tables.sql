@@ -6,7 +6,7 @@ create table parameters.system_config(
     config_description text null,
     config_type text,
     created_at timestamp default current_timestamp,
-    updated_at_at timestamp default current_timestamp
+    updated_at timestamp default current_timestamp
 );
 
 create table parameters.insti_app_config(
@@ -15,7 +15,7 @@ create table parameters.insti_app_config(
     config_insti_code text,
     config_app_code text,
     created_at timestamp default current_timestamp,
-    updated_at_at timestamp default current_timestamp
+    updated_at timestamp default current_timestamp
 );
 
 insert into parameters.system_config
