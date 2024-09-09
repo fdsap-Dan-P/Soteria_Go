@@ -24,14 +24,16 @@ func RegisterUser(c *fiber.Ctx) error {
 	moduleName := "User Management"
 	funcName := "Register New User"
 
-	// Extraxt the api key
-	apiKey := c.Get("X-API-Key")
+	// // Extraxt the api key
+	// apiKey := c.Get("X-API-Key")
 
-	// validate the api key
-	apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", funcName, methodUsed, endpoint, []byte(""))
-	if !apiKeyValidatedStatus.Data.IsSuccess {
-		return c.JSON(apiKeyValidatedStatus)
-	}
+	// // validate the api key
+	// apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", funcName, methodUsed, endpoint, []byte(""))
+	// if !apiKeyValidatedStatus.Data.IsSuccess {
+	// 	return c.JSON(apiKeyValidatedStatus)
+	// }
+
+	appDetails := response.ApplicationDetails{}
 
 	// parse the request body
 	if parsErr := c.BodyParser(&newUserRequest); parsErr != nil {
@@ -72,21 +74,33 @@ func RegisterUser(c *fiber.Ctx) error {
 	}
 
 	// validate if staff id already exists
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ?", newUserRequest.Staff_id, newUserRequest.Username).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ?", newUserRequest.Staff_id).Scan(&UserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	if UserDetails.User_id != 0 {
+	fmt.Println("UserDetails: ", UserDetails.User_id)
+
+	if strings.TrimSpace(UserDetails.Staff_id) != "" {
 		UserDetails.User_id = 0 // data privacy
 
 		return c.JSON(response.ResponseModel{
 			RetCode: "403",
-			Message: "Validation Failed | Username or Employee ID Already Exists",
-			Data:    UserDetails,
+			Message: "Validation Failed",
+			Data: response.DataModel{
+				Message:   "Username or Employee ID Already Exists",
+				IsSuccess: false,
+				Error:     nil,
+				Details:   UserDetails,
+			},
 		})
+
+		// send email to the user that statte
+		// tried being added via <app name>
+		// pleaase used the current credentials to login
+		// or forget the password if you dont remember it
 	}
 
 	// get hcis details
@@ -108,7 +122,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		}
 	}
 
-	if remark.Remark != "" {
+	if remark.Remark != "Success" {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -144,6 +158,8 @@ func RegisterUser(c *fiber.Ctx) error {
 	if !returnMessage.Data.IsSuccess {
 		return c.JSON(returnMessage)
 	}
+
+	fmt.Println(returnMessage)
 
 	return c.JSON(returnMessage)
 }

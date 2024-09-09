@@ -19,8 +19,7 @@ DECLARE
     userId INT;
 BEGIN
     BEGIN
-        INSERT INTO user_accounts(username, first_name, middle_name, last_name, email, phone_no, staff_id, institution_id) VALUES (p_username, p_first_name, p_middle_name, p_last_name, p_email, p_phone_no, p_staff_id, p_institution_id) RETURNING user_id;
-        userId = user_id;
+        INSERT INTO user_accounts(username, first_name, middle_name, last_name, email, phone_no, staff_id, institution_id) VALUES (p_username, p_first_name, p_middle_name, p_last_name, p_email, p_phone_no, p_staff_id, p_institution_id) RETURNING user_id INTO userId;
         RETURN 'Success';
     EXCEPTION
         WHEN OTHERS THEN

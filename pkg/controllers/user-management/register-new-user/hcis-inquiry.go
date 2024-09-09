@@ -30,7 +30,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	hcis_password := "P@ssword123"
 	hcis_authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(hcis_username+":"+hcis_password))
 
-	hcis_reqBody := map[string]string{"StaffId": staffId}
+	hcis_reqBody := map[string]string{"StaffID": staffId}
 	hcis_reqBodyByte, marshallErr := json.Marshal(hcis_reqBody)
 	if marshallErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "311", methodUsed, endpoint, reqBody, []byte(""), "Marshalling HCIS Request Failed", marshallErr, hcis_reqBody)
@@ -84,7 +84,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	}
 
 	// check if user institution is already in database
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.institutions WHERE institution_name = ?", userHCISDetails.Institution_name).First(&instiDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_name = ?", userHCISDetails.Institution_name).First(&instiDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails

@@ -3,8 +3,8 @@ package registernewuser
 import (
 	"encoding/json"
 	"soteria_go/pkg/middleware"
-	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/request"
+	"soteria_go/pkg/models/response"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,14 +19,16 @@ func HCISUserDetailsProvider(c *fiber.Ctx) error {
 	funcName := "HCIS User Details Provider"
 
 	// Extraxt the headers
-	apiKey := c.Get("X-API-Key")
-	authHeader := c.Get("Authorization")
+	// apiKey := c.Get("X-API-Key")
+	// authHeader := c.Get("Authorization")
 	// validate the api key
 
-	validationStatus, validationDetails := validations.HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint)
-	if !validationStatus.Data.IsSuccess {
-		return c.JSON(validationStatus)
-	}
+	// validationStatus, validationDetails := validations.HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint)
+	// if !validationStatus.Data.IsSuccess {
+	// 	return c.JSON(validationStatus)
+	// }
+
+	validationDetails := response.HeaderValidationResponse{}
 
 	// get the request body
 	if parsErr := c.BodyParser(&inquiryRequest); parsErr != nil {
@@ -57,6 +59,12 @@ func HCISUserDetailsProvider(c *fiber.Ctx) error {
 		return c.JSON(HcisInquiryStatus)
 	}
 
+	if strings.TrimSpace(inquiryRequest.Username) == "" {
+		HcisInquiryDetails.Username = inquiryRequest.Staff_id
+	} else {
+		HcisInquiryDetails.Username = inquiryRequest.Username
+	}
+
 	// marshal the response
 	HcisInquiryDetailsByte, marshalErr := json.Marshal(HcisInquiryDetails)
 	if marshalErr != nil {
@@ -70,5 +78,6 @@ func HCISUserDetailsProvider(c *fiber.Ctx) error {
 	if !returnMessage.Data.IsSuccess {
 		return c.JSON(returnMessage)
 	}
+
 	return c.JSON(returnMessage)
 }
