@@ -3,6 +3,7 @@ package registernewuser
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
@@ -48,6 +49,13 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 		SetHeader("Authorization", hcis_authHeader).
 		SetBody(hcis_reqBodyByte).
 		Post("https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo")
+
+	// check the response from HCIS
+	fmt.Println("- - - - - - - - - - HCIS Response - - - - - - - - - - -")
+	fmt.Println("STATUS: ", resp.StatusCode())
+	fmt.Println("SUCCESS \n", resp.String())
+	fmt.Println("ERROR: ", respErr.Error())
+	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 
 	if respErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "317", methodUsed, endpoint, reqBody, []byte(""), "Reading HCIS Response Failed", respErr, resp)
