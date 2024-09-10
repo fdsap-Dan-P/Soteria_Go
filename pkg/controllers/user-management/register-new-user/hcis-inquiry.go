@@ -54,7 +54,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	fmt.Println("- - - - - - - - - - HCIS Response - - - - - - - - - - -")
 	fmt.Println("STATUS: ", resp.StatusCode())
 	fmt.Println("SUCCESS \n", resp.String())
-	fmt.Println("ERROR: ", respErr.Error())
+	fmt.Println("ERROR: ", respErr)
 	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 
 	if respErr != nil {
