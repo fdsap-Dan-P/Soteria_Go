@@ -3,7 +3,6 @@ package userlogs
 import (
 	"encoding/json"
 	"soteria_go/pkg/middleware"
-	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/request"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
@@ -24,14 +23,15 @@ func Login(c *fiber.Ctx) error {
 	funcName := "Log In"
 
 	// Extraxt the api key
-	apiKey := c.Get("X-API-Key")
+	// apiKey := c.Get("X-API-Key")
 
-	// validate the api key
-	apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", funcName, methodUsed, endpoint, []byte(""))
-	if !apiKeyValidatedStatus.Data.IsSuccess {
-		return c.JSON(apiKeyValidatedStatus)
-	}
+	// // validate the api key
+	// apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", funcName, methodUsed, endpoint, []byte(""))
+	// if !apiKeyValidatedStatus.Data.IsSuccess {
+	// 	return c.JSON(apiKeyValidatedStatus)
+	// }
 
+	appDetails := response.ApplicationDetails{}
 	// parse the request body
 	if parsErr := c.BodyParser(&credentialRequest); parsErr != nil {
 		returnMessage := middleware.ResponseData("", "", appDetails.Application_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
