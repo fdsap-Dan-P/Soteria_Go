@@ -148,7 +148,7 @@ func RegisterUser(c *fiber.Ctx) error {
 
 	// send confirmation that user was successfully registered with ther credentials
 	userFullName := UserDetails.First_name + " " + UserDetails.Last_name
-	mailBody := "Dear " + userFullName + ", \r\n\nHere is your New " + appDetails.Application_name + " Account credentials. \n\nUsername: " + UserDetails.Username + "\nor\n" + "Employee ID: " + UserDetails.Staff_id + "\n\n" + "Password: " + hashTempPassword + "\n\n\n\nYou can login here:\nhttps://bakawan-rbi.fortress-asya.com \n or via Cagabay Mobile App\n\n Thank you, \n\n" + appDetails.Application_name + " Support Team"
+	mailBody := "Dear " + userFullName + ", \r\n\nHere is your New " + appDetails.Application_name + " Account credentials. \n\nUsername: " + UserDetails.Username + "\nor\n" + "Employee ID: " + UserDetails.Staff_id + "\n\n" + "Password: " + tempPassword + "\n\n\n\nYou can login here:\nhttps://bakawan-rbi.fortress-asya.com \n or via Cagabay Mobile App\n\n Thank you, \n\n" + appDetails.Application_name + " Support Team"
 	sendEmailErr := middleware.SendMail(userFullName, UserDetails.Email, "New "+appDetails.Application_name+" Credentials", mailBody, UserDetails.Username, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint, newUserRequestByte, UserDetailsByte)
 	if !sendEmailErr.Data.IsSuccess {
 		return c.JSON(sendEmailErr)
