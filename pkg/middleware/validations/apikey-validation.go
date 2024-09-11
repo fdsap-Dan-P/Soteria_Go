@@ -2,6 +2,7 @@ package validations
 
 import (
 	"encoding/json"
+	"fmt"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
@@ -14,6 +15,7 @@ func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUs
 	appDetails := response.ApplicationDetails{}
 	// check if api key has value
 	if strings.TrimSpace(apiKey) == "" {
+		fmt.Println("API KEY: ", apiKey)
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "401", methodUsed, endpoint, reqBody, []byte(""), "API Key Authorization Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, appDetails
@@ -29,7 +31,7 @@ func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUs
 	}
 
 	if appDetails.Application_id == 0 {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "401", methodUsed, endpoint, reqBody, []byte(""), "API Key Authorization Missing", nil, nil)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "404", methodUsed, endpoint, reqBody, []byte(""), "API Key Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, appDetails
 		}
@@ -48,5 +50,6 @@ func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUs
 
 	successResp := response.ReturnModel{Data: response.DataModel{IsSuccess: true}}
 
+	fmt.Println("APP DETAILS: ", appDetails)
 	return successResp, appDetails
 }

@@ -25,8 +25,12 @@ func GenerateToken(username, instiCode, appCode, moduleName, methodUsed, endpoin
 	funcName := "Generate Token"
 
 	configResponse := response.ConfigDetails{}
-	if err := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = 'jwt' AND insti_code = ? AND app_code = ?", instiCode, appCode).Scan(&configResponse).Error; err != nil {
+	if err := database.DBConn.Debug().Raw("SELECT * FROM parameters.system_config_params WHERE config_code = 'jwt' AND config_insti_code = ? AND config_app_code = ?", instiCode, appCode).Scan(&configResponse).Error; err != nil {
 		return "", err
+	}
+
+	if configResponse.Config_value == "" {
+		return "", fmt.Errorf("config value not found")
 	}
 
 	duration, err := strconv.Atoi(configResponse.Config_value)
@@ -133,7 +137,7 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 		}
 	}
 
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_tokens WHERE (user_name = ? OR staff_id = ?) AND insti_code = ? AND app_code = ?", username, staffId, instiCode, appCode).Scan(&userTokenDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM logs.user_tokens WHERE (username = ? OR staff_id = ?) AND insti_code = ? AND app_code = ?", username, staffId, instiCode, appCode).Scan(&userTokenDetails).Error; fetchErr != nil {
 		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
