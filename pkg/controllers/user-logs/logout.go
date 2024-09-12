@@ -41,7 +41,7 @@ func LogOut(c *fiber.Ctx) error {
 		}
 	}
 
-	if deleteErr := database.DBConn.Exec("DELETE FROM public.user_tokens WHERE username = ? OR staff_id = ?", username, username).Error; deleteErr != nil {
+	if deleteErr := database.DBConn.Exec("DELETE FROM logs.user_tokens WHERE username = ? OR staff_id = ?", username, username).Error; deleteErr != nil {
 		returnMessage := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "314", methodUsed, endpoint, []byte(""), []byte(""), "", deleteErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
