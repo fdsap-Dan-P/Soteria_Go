@@ -70,7 +70,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// check if user identity is valid
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_accounts WHERE staff_id = ? OR username = ? OR email = ? OR phone_no = ?", credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity).Scan(&userDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ? OR email = ? OR phone_no = ?", credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity).Scan(&userDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, credentialRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
