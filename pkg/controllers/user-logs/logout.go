@@ -28,7 +28,7 @@ func LogOut(c *fiber.Ctx) error {
 	}
 
 	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ?", username).Scan(&userDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, fetchErr.Error())
+		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -42,7 +42,7 @@ func LogOut(c *fiber.Ctx) error {
 	}
 
 	if deleteErr := database.DBConn.Exec("DELETE FROM public.user_tokens WHERE username = ? OR staff_id = ?", username, username).Error; deleteErr != nil {
-		returnMessage := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "314", methodUsed, endpoint, []byte(""), []byte(""), "", deleteErr, deleteErr.Error())
+		returnMessage := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "314", methodUsed, endpoint, []byte(""), []byte(""), "", deleteErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
