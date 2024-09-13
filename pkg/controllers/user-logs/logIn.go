@@ -146,7 +146,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// create or recrete the user token
-	isTokenStored := middleware.StoringUserToken(userDetails.Username, userDetails.Staff_id, token, instiDetails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint, credentialRequestByte)
+	isTokenStored := middleware.StoringUserToken(token, userDetails.Username, userDetails.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint, credentialRequestByte)
 	if !isTokenStored.Data.IsSuccess {
 		return c.JSON(isTokenStored)
 	}
