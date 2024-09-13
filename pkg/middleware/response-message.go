@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
 )
@@ -50,6 +51,9 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 	if details != nil {
 		returnMessage.Data.Details = details
 	}
+
+	fmt.Println("")
+	fmt.Printf("%s | %s | Error: %+v", returnMessage.RetCode, returnMessage.Data.Message, returnMessage.Data.Error)
 
 	ActivityLogger(username, instiCode, appCode, moduleName, funcName, retcode, method, endpoint, []byte(reqBody), []byte(""), returnMessage.Message, returnMessage.Data.Message, error_message)
 	return returnMessage
