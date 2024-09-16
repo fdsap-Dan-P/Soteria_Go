@@ -25,15 +25,13 @@ func RegisterUser(c *fiber.Ctx) error {
 	funcName := "Register New User"
 
 	// // Extraxt the api key
-	// apiKey := c.Get("X-API-Key")
+	apiKey := c.Get("X-API-Key")
 
-	// // validate the api key
-	// apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", funcName, methodUsed, endpoint, []byte(""))
-	// if !apiKeyValidatedStatus.Data.IsSuccess {
-	// 	return c.JSON(apiKeyValidatedStatus)
-	// }
-
-	appDetails := response.ApplicationDetails{}
+	// validate the api key
+	apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", funcName, methodUsed, endpoint, []byte(""))
+	if !apiKeyValidatedStatus.Data.IsSuccess {
+		return c.JSON(apiKeyValidatedStatus)
+	}
 
 	// parse the request body
 	if parsErr := c.BodyParser(&newUserRequest); parsErr != nil {
