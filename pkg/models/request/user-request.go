@@ -10,4 +10,9 @@ type (
 		User_identity string `json:"user_identity"`
 		Password      string `json:"password"`
 	}
+
+	ChangePasswordRequest struct {
+		Old_password string `json:"old_password"`
+		New_password string `json:"new_password"`
+	}
 )

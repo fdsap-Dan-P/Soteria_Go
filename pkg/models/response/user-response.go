@@ -45,4 +45,8 @@ type (
 		App_code   string `json:"app_code"`
 		App_name   string `json:"app_name"`
 	}
+
+	LastPasswordUsed struct {
+		Password_hash string `json:"password_hash"`
+	}
 )

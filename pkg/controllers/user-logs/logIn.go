@@ -27,11 +27,10 @@ func Login(c *fiber.Ctx) error {
 
 	// Extraxt the api key
 	apiKey := c.Get("X-API-Key")
-	// apiKey := "01424d99-a661-4829-b52e-a5daafdb94e4"
 	fmt.Println("API KEY: ", apiKey)
 
 	// validate the api key
-	apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", funcName, methodUsed, endpoint, []byte(""))
+	apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", moduleName, methodUsed, endpoint, []byte(""))
 	if !apiKeyValidatedStatus.Data.IsSuccess {
 		return c.JSON(apiKeyValidatedStatus)
 	}
