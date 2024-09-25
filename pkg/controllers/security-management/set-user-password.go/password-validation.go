@@ -125,7 +125,7 @@ func PasswordReuseValidation(password string, instiCode string, appCode string, 
 	funcName := "Password Reuse Validation"
 
 	// get the minimum password reuse
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = 'pass_reuse' AND config_insti_code = ? AND config_app_code = ?").Scan(&minPassReuse).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = 'pass_reuse' AND config_insti_code = ? AND config_app_code = ?", instiCode, appCode).Scan(&minPassReuse).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
