@@ -4,6 +4,7 @@ import (
 	"soteria_go/pkg/controllers/healthchecks"
 	securitymanagement "soteria_go/pkg/controllers/security-management"
 	setparameters "soteria_go/pkg/controllers/security-management/set-parameters"
+	setuserpassword "soteria_go/pkg/controllers/security-management/set-user-password.go"
 	userlogs "soteria_go/pkg/controllers/user-logs"
 	registernewuser "soteria_go/pkg/controllers/user-management/register-new-user"
 
@@ -45,6 +46,9 @@ func SetupPublicRoutes(app *fiber.App) {
 	secManagement := auth.Group("/security-management")
 	secManagement.Get("/validate-header", securitymanagement.ThirdPartyHeaderValidation)
 	v1Endpoint.Post("/register-application", securitymanagement.AppRegistration) // no validation
+	secManagement.Post("/change-password", setuserpassword.UserInitiatedPasswordChange)
+	secManagement.Post("/expire-password", setuserpassword.UserChangePasswordAfterExpired)
+	secManagement.Get("/reset-password", setuserpassword.ResetUserPasswordToTemporary)
 
 	// Set Parameters
 	setParams := secManagement.Group("/parameters")

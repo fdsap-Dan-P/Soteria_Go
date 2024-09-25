@@ -18,6 +18,7 @@ type (
 		Requires_password_reset bool   `json:"requires_password_reset,omitempty"`
 		Last_password_reset     string `json:"last_password_reset,omitempty"`
 		Token                   string `json:"token,omitempty"`
+		Password                string `json:"password,omitempty"`
 	}
 
 	UserPasswordDetails struct {
