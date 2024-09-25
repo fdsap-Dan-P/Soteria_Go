@@ -46,9 +46,9 @@ func SetupPublicRoutes(app *fiber.App) {
 	secManagement := auth.Group("/security-management")
 	secManagement.Get("/validate-header", securitymanagement.ThirdPartyHeaderValidation)
 	v1Endpoint.Post("/register-application", securitymanagement.AppRegistration) // no validation
-	secManagement.Post("/change-password", setuserpassword.UserInitiatedPasswordChange)
-	secManagement.Post("/expire-password", setuserpassword.UserChangePasswordAfterExpired)
-	secManagement.Get("/reset-password", setuserpassword.ResetUserPasswordToTemporary)
+	secManagement.Post("/change-password/:username", setuserpassword.UserInitiatedPasswordChange)
+	secManagement.Post("/expire-password/:username", setuserpassword.UserChangePasswordAfterExpired)
+	secManagement.Get("/reset-password/:username", setuserpassword.ResetUserPasswordToTemporary)
 
 	// Set Parameters
 	setParams := secManagement.Group("/parameters")
