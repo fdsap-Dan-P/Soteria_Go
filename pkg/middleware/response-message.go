@@ -53,7 +53,7 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 	}
 
 	fmt.Println("")
-	fmt.Printf("%s | %s | Error: %+v", returnMessage.RetCode, returnMessage.Data.Message, returnMessage.Data.Error)
+	fmt.Printf("%s | %s | Error: %+v | %s", returnMessage.RetCode, returnMessage.Data.Message, returnMessage.Data.Error, funcName)
 
 	ActivityLogger(username, instiCode, appCode, moduleName, funcName, retcode, method, endpoint, []byte(reqBody), []byte(""), returnMessage.Message, returnMessage.Data.Message, error_message)
 	return returnMessage
