@@ -161,6 +161,8 @@ func Login(c *fiber.Ctx) error {
 		}
 	}
 
+	fmt.Println("userDetailsByte: ", string(userDetailsByte))
+
 	returnMessage := middleware.ResponseData(credentialRequest.User_identity, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "201", methodUsed, endpoint, credentialRequestByte, userDetailsByte, "", nil, userDetails)
 	if !returnMessage.Data.IsSuccess {
 		return c.JSON(returnMessage)
