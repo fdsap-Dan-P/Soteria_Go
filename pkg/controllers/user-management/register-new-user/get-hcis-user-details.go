@@ -3,8 +3,8 @@ package registernewuser
 import (
 	"encoding/json"
 	"soteria_go/pkg/middleware"
+	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/request"
-	"soteria_go/pkg/models/response"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,16 +19,13 @@ func HCISUserDetailsProvider(c *fiber.Ctx) error {
 	funcName := "HCIS User Details Provider"
 
 	// Extraxt the headers
-	// apiKey := c.Get("X-API-Key")
-	// authHeader := c.Get("Authorization")
-	// validate the api key
+	apiKey := c.Get("X-API-Key")
+	authHeader := c.Get("Authorization")
 
-	// validationStatus, validationDetails := validations.HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint)
-	// if !validationStatus.Data.IsSuccess {
-	// 	return c.JSON(validationStatus)
-	// }
-
-	validationDetails := response.HeaderValidationResponse{}
+	validationStatus, validationDetails := validations.HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint)
+	if !validationStatus.Data.IsSuccess {
+		return c.JSON(validationStatus)
+	}
 
 	// get the request body
 	if parsErr := c.BodyParser(&inquiryRequest); parsErr != nil {
