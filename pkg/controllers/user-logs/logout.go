@@ -29,7 +29,7 @@ func LogOut(c *fiber.Ctx) error {
 		return c.JSON(apiKeyValidatedStatus)
 	}
 
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ?", username).Scan(&userDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ? OR staff_id = ?", username, username).Scan(&userDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
