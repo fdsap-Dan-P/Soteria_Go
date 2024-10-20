@@ -13,13 +13,12 @@ import (
 )
 
 func SetParams(c *fiber.Ctx) error {
-	configCode := c.Params("config_code")
 	paramRequest := request.ParameterRequest{}
 	paramDetaills := response.ConfigDetails{}
-	paramParameter := response.ConfigDetails{}
+	configParam := response.ConfigDetails{}
 
 	moduleName := "Security Management"
-	funcName := "Set JWT Parameter"
+	funcName := "Set Parameter Value"
 	methodUsed := c.Method()
 	endpoint := c.Path()
 
@@ -51,37 +50,22 @@ func SetParams(c *fiber.Ctx) error {
 	}
 
 	// validate if request body is not empty
-	if strings.TrimSpace(paramRequest.No_of_minutes) == "" {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Parameter Value Input Missing", marshalErr, marshalErr.Error())
+	if strings.TrimSpace(paramRequest.Config_code) == "" {
+		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Config Code Input Missing", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	if strings.TrimSpace(paramRequest.Application_code) == "" {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Application Code Input Missing", marshalErr, marshalErr.Error())
+	if strings.TrimSpace(paramRequest.Config_value) == "" {
+		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Config Value Input Missing", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	if strings.TrimSpace(paramRequest.Institution_code) == "" {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Institution Code Input Missing", marshalErr, marshalErr.Error())
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	// validate if autholrized to set the parameter
-	if headerValidationResponse.Insti_code != paramRequest.Institution_code || headerValidationResponse.App_code != paramRequest.Application_code {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "402", methodUsed, endpoint, paramRequestByte, []byte(""), "", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	// get jwt details
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config WHERE insti_code = ?", configCode).Scan(&paramDetaills).Error; fetchErr != nil {
+	// check first if config code exist
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config WHERE config_code = ?", paramRequest.Config_code).Scan(&paramDetaills).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, paramRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -89,15 +73,15 @@ func SetParams(c *fiber.Ctx) error {
 	}
 
 	if paramDetaills.Config_id == 0 {
-		errMessage := "Parameter " + configCode + " Not Found"
+		errMessage := "Parameter " + paramRequest.Config_code + " Not Found"
 		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "404", methodUsed, endpoint, paramRequestByte, []byte(""), errMessage, nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	// set parameter
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.insti_app_config WHERE config_id = ? AND insti_code = ? AND app_code = ?", paramDetaills.Config_id, paramRequest.Institution_code, paramRequest.Application_code).Scan(&paramParameter).Error; fetchErr != nil {
+	// check if param was set for the insti and app
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = ? AND config_insti_code AND config_app_code", paramRequest.Config_code, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, paramRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -105,8 +89,8 @@ func SetParams(c *fiber.Ctx) error {
 	}
 
 	retCode := ""
-	if paramParameter.Config_id == 0 {
-		if insErr := database.DBConn.Raw("INSERT INTO parameters.insti_app_config (config_id, config_value, insti_code, app_code) VALUES (?, ?, ?)", paramDetaills.Config_id, paramRequest.No_of_minutes, paramRequest.Institution_code, paramRequest.Application_code).Scan(&paramParameter).Error; insErr != nil {
+	if configParam.Config_id == 0 {
+		if insErr := database.DBConn.Raw("INSERT INTO parameters.insti_app_config (config_id, config_value, insti_code, app_code) VALUES (?, ?, ?, ?)", paramDetaills.Config_id, paramRequest.Config_value, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; insErr != nil {
 			returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "303", methodUsed, endpoint, paramRequestByte, []byte(""), "", insErr, insErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
@@ -115,7 +99,7 @@ func SetParams(c *fiber.Ctx) error {
 		retCode = "203"
 	} else {
 		currentDateTime := middleware.GetDateTime().Data.Message
-		if updatErr := database.DBConn.Raw("UPDATE parameters.insti_app_config SET config_value = ?, updated_at = ? WHERE config_id = ? AND insti_code = ? AND app_code = ?", paramRequest.No_of_minutes, currentDateTime, paramDetaills.Config_id, paramRequest.Institution_code, paramRequest.Application_code).Scan(&paramParameter).Error; updatErr != nil {
+		if updatErr := database.DBConn.Raw("UPDATE parameters.insti_app_config SET config_value = ?, updated_at = ? WHERE config_id = ? AND insti_code = ? AND app_code = ?", paramRequest.Config_value, currentDateTime, paramDetaills.Config_id, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; updatErr != nil {
 			returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "304", methodUsed, endpoint, paramRequestByte, []byte(""), "", updatErr, updatErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
@@ -125,7 +109,7 @@ func SetParams(c *fiber.Ctx) error {
 	}
 
 	// get the new value
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_id = ? AND insti_code = ? AND app_code = ?", paramDetaills.Config_id, paramRequest.Institution_code, paramRequest.Application_code).Scan(&paramDetaills).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = ? AND insti_code = ? AND app_code = ?", paramRequest.Config_code, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&paramDetaills).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, paramRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)

@@ -11,8 +11,7 @@ type (
 	}
 
 	ParameterRequest struct {
-		No_of_minutes    string `json:"no_of_minutes"`
-		Institution_code string `json:"institution_code"`
-		Application_code string `json:"application_code"`
+		Config_code  string `json:"config_code"`
+		Config_value string `json:"config_value"`
 	}
 )
