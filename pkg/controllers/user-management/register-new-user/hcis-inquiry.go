@@ -110,6 +110,8 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	}
 
 	userHCISDetails.Institution_id = instiDetails.Institution_id
+	userHCISDetails.Institution_code = instiDetails.Institution_code
+	userHCISDetails.Institution_name = instiDetails.Institution_name
 
 	// marshal the response struct
 	userHCISDetailsByte, marshalErr := json.Marshal(userHCISDetails)
