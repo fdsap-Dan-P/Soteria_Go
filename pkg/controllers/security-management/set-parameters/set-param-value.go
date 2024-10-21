@@ -81,7 +81,7 @@ func SetParams(c *fiber.Ctx) error {
 	}
 
 	// check if param was set for the insti and app
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = ? AND config_insti_code AND config_app_code", paramRequest.Config_code, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = ? AND config_insti_code = ? AND config_app_code = ?", paramRequest.Config_code, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, paramRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
