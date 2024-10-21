@@ -49,7 +49,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		}
 	}
 
-	successMessage := middleware.ResponseData(validationDetails.Username, validationDetails.App_code, validationDetails.Insti_code, moduleName, funcName, "210", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)
+	successMessage := middleware.ResponseData(validationDetails.Username, validationDetails.App_code, validationDetails.Insti_code, moduleName, funcName, "210", methodUsed, endpoint, []byte(""), []byte(""), "", nil, userDetails)
 
 	return c.JSON(successMessage)
 }
