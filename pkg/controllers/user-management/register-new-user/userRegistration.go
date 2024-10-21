@@ -25,18 +25,17 @@ func RegisterUser(c *fiber.Ctx) error {
 	funcName := "Register New User"
 
 	// extract headers
-	authHeader := c.Get("Authorization")
 	apiKey := c.Get("X-API-Key")
 
-	// validate the header
-	headerValidationStatus, headerValidationResponse := validations.HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint)
-	if !headerValidationStatus.Data.IsSuccess {
-		return c.JSON(headerValidationStatus)
+	// validate the api key
+	apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", moduleName, methodUsed, endpoint, []byte(""))
+	if !apiKeyValidatedStatus.Data.IsSuccess {
+		return c.JSON(apiKeyValidatedStatus)
 	}
 
 	// parse the request body
 	if parsErr := c.BodyParser(&newUserRequest); parsErr != nil {
-		returnMessage := middleware.ResponseData("", "", headerValidationResponse.App_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
+		returnMessage := middleware.ResponseData("", "", appDetails.Application_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -45,7 +44,7 @@ func RegisterUser(c *fiber.Ctx) error {
 	// marshal the request body
 	newUserRequestByte, marshalErr := json.Marshal(newUserRequest)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Request Body Failed", marshalErr, marshalErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Request Body Failed", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -53,7 +52,7 @@ func RegisterUser(c *fiber.Ctx) error {
 
 	// check if staff_id has value
 	if strings.TrimSpace(newUserRequest.Staff_id) == "" {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Missing", nil, nil)
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -66,7 +65,7 @@ func RegisterUser(c *fiber.Ctx) error {
 	// validate the staff id format
 	isStaffIdValidated := validations.StaffIdValidation(newUserRequest.Staff_id, moduleName, methodUsed, endpoint)
 	if !isStaffIdValidated {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "112", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Missing", nil, nil)
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "112", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -74,7 +73,7 @@ func RegisterUser(c *fiber.Ctx) error {
 
 	// validate if staff id already exists
 	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ?", newUserRequest.Staff_id).Scan(&UserDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -103,7 +102,7 @@ func RegisterUser(c *fiber.Ctx) error {
 	}
 
 	// get hcis details
-	hcisResponseStatus, hcisResponseDeatails := HcisInquiry(newUserRequest.Staff_id, newUserRequest.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, "User Registration", methodUsed, endpoint, newUserRequestByte)
+	hcisResponseStatus, hcisResponseDeatails := HcisInquiry(newUserRequest.Staff_id, newUserRequest.Username, "", appDetails.Application_code, "User Registration", methodUsed, endpoint, newUserRequestByte)
 	if !hcisResponseStatus.Data.IsSuccess {
 		return c.JSON(hcisResponseStatus)
 	}
@@ -114,14 +113,14 @@ func RegisterUser(c *fiber.Ctx) error {
 
 	// register the user
 	if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, newUserRequest.Staff_id, hcisResponseDeatails.Institution_id, hashTempPassword, true, "").Scan(&remark).Error; insertErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, headerValidationResponse.App_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if remark.Remark != "Success" {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, headerValidationResponse.App_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -129,7 +128,7 @@ func RegisterUser(c *fiber.Ctx) error {
 
 	// get user details
 	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ?", newUserRequest.Staff_id, newUserRequest.Username).Scan(&UserDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -141,13 +140,13 @@ func RegisterUser(c *fiber.Ctx) error {
 	// marshal the response body
 	UserDetailsByte, marshalErr := json.Marshal(UserDetails)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, headerValidationResponse.App_code, moduleName, funcName, "311", methodUsed, endpoint, newUserRequestByte, []byte(""), "", marshalErr, marshalErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, newUserRequestByte, []byte(""), "", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	successResp := middleware.ResponseData(UserDetails.Username, hcisResponseDeatails.Institution_code, headerValidationResponse.App_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, UserDetails)
+	successResp := middleware.ResponseData(UserDetails.Username, hcisResponseDeatails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, UserDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
