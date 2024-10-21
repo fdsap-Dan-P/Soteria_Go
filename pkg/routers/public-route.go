@@ -56,7 +56,7 @@ func SetupPublicRoutes(app *fiber.App) {
 	// Set Parameters
 	setParams := secManagement.Group("/parameters")
 	setParams.Post("/update", setparameters.SetParams)
-	setParams.Get("/list", setparameters.SetParams)
+	setParams.Get("/list", setparameters.ParameterList)
 }
 
 func SetupPublicRoutesB(app *fiber.App) {
