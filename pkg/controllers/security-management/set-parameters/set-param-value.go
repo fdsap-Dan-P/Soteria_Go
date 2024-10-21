@@ -133,9 +133,6 @@ func SetParams(c *fiber.Ctx) error {
 	}
 
 	returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, retCode, methodUsed, endpoint, paramRequestByte, paramDetaillsByte, "", nil, paramDetaills)
-	if !returnMessage.Data.IsSuccess {
-		return c.JSON(returnMessage)
-	}
 
 	return c.JSON(returnMessage)
 }
