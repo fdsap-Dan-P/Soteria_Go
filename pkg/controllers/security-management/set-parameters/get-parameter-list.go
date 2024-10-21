@@ -26,7 +26,7 @@ func ParameterList(c *fiber.Ctx) error {
 		return c.JSON(headerValidationStatus)
 	}
 
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_insti_code = ? AND app_code = ?", headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_insti_code = ? AND config_app_code = ?", headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
