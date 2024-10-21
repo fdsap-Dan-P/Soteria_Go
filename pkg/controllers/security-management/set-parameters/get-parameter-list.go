@@ -40,7 +40,7 @@ func ParameterList(c *fiber.Ctx) error {
 		}
 	}
 
-	successMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", nil, configParam)
+	successMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "200", methodUsed, endpoint, []byte(""), []byte(""), "", nil, configParam)
 
 	return c.JSON(successMessage)
 }
