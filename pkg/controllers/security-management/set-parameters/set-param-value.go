@@ -99,7 +99,7 @@ func SetParams(c *fiber.Ctx) error {
 		retCode = "203"
 	} else {
 		currentDateTime := middleware.GetDateTime().Data.Message
-		if updatErr := database.DBConn.Raw("UPDATE parameters.insti_app_config SET config_value = ?, updated_at = ? WHERE config_id = ? AND insti_code = ? AND app_code = ?", paramRequest.Config_value, currentDateTime, paramDetaills.Config_id, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; updatErr != nil {
+		if updatErr := database.DBConn.Raw("UPDATE parameters.insti_app_config SET config_value = ?, updated_at = ? WHERE config_id = ? AND config_insti_code = ? AND config_app_code = ?", paramRequest.Config_value, currentDateTime, paramDetaills.Config_id, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; updatErr != nil {
 			returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "304", methodUsed, endpoint, paramRequestByte, []byte(""), "", updatErr, updatErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
