@@ -15,7 +15,7 @@ import (
 )
 
 func UpdateUserDetails(c *fiber.Ctx) error {
-	user_username := c.Params("user_username")
+	userIdentity := c.Params("user_identity")
 	newUserRequest := request.UserRegistrationRequest{}
 	UserDetails := response.UserDetails{}
 	remark := response.DBFuncResponse{}
@@ -35,7 +35,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// check if to be updated exist
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ? OR email = ? OR phone_no = ?", user_username, user_username, user_username, user_username).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ? OR email = ? OR phone_no = ?", userIdentity, userIdentity, userIdentity, userIdentity).Scan(&UserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
