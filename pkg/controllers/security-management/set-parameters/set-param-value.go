@@ -90,7 +90,7 @@ func SetParams(c *fiber.Ctx) error {
 
 	retCode := ""
 	if configParam.Config_id == 0 {
-		if insErr := database.DBConn.Raw("INSERT INTO parameters.insti_app_config (config_id, config_value, insti_code, app_code) VALUES (?, ?, ?, ?)", paramDetaills.Config_id, paramRequest.Config_value, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; insErr != nil {
+		if insErr := database.DBConn.Raw("INSERT INTO parameters.insti_app_config (config_id, config_value, config_insti_code, config_app_code) VALUES (?, ?, ?, ?)", paramDetaills.Config_id, paramRequest.Config_value, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&configParam).Error; insErr != nil {
 			returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "303", methodUsed, endpoint, paramRequestByte, []byte(""), "", insErr, insErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
@@ -109,7 +109,7 @@ func SetParams(c *fiber.Ctx) error {
 	}
 
 	// get the new value
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = ? AND insti_code = ? AND app_code = ?", paramRequest.Config_code, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&paramDetaills).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_code = ? AND config_insti_code = ? AND config_app_code = ?", paramRequest.Config_code, headerValidationResponse.Insti_code, headerValidationResponse.App_code).Scan(&paramDetaills).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, paramRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
