@@ -64,6 +64,13 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 		}
 	}
 
+	if resp.StatusCode() != 200 || resp.IsSuccess() {
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "405", methodUsed, endpoint, reqBody, []byte(""), "Request Failed To HCIS", respErr, resp)
+		if !returnMessage.Data.IsSuccess {
+			return returnMessage, userHCISDetails
+		}
+	}
+
 	// Unmarshal the response body into the struct
 	if unmarshallErr := json.Unmarshal(resp.Body(), &userHCISInfo); unmarshallErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "310", methodUsed, endpoint, reqBody, []byte(""), "", unmarshallErr, unmarshallErr.Error())
