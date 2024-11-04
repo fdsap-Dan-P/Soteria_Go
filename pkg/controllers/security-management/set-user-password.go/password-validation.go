@@ -55,7 +55,7 @@ func PasswordValidation(password, instiCode, appCode, username, moduleName, meth
 	// - - - - - - - - P A S S W O R D    C H A R A C T E R S    V A L I D A T I O N - - - - - - - -//
 	passCharValidation := []response.ConfigDetails{}
 
-	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_value = 'true' AND config_code IN('pass_lowc','pass_upc','pass_num','pass_sym')").Scan(&passCharValidation).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config_params WHERE config_value = 'true' AND config_code IN('pass_lowc','pass_upc','pass_num','pass_sym') AND config_insti_code = ?", instiCode).Scan(&passCharValidation).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
