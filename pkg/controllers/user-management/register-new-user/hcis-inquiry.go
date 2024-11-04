@@ -69,7 +69,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	fmt.Println("- - - - - STATUS CODE - - - - - - -")
 	fmt.Println("resp.StatusCode: ", resp.StatusCode())
 	fmt.Println("http.StatusOK: ", http.StatusOK)
-	if resp.StatusCode() != http.StatusOK {
+	if resp.StatusCode() != http.StatusOK || resp.StatusCode() != 201 {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "405", methodUsed, endpoint, reqBody, []byte(""), "Request Failed To HCIS", respErr, resp)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
