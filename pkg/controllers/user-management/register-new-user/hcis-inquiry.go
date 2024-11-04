@@ -69,8 +69,8 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	fmt.Println("- - - - - STATUS CODE - - - - - - -")
 	fmt.Println("resp.StatusCode: ", resp.StatusCode())
 	fmt.Println("http.StatusOK: ", http.StatusOK)
-	if resp.StatusCode() != http.StatusOK {
-		if resp.StatusCode() == 201 {
+	if resp.StatusCode() != http.StatusOK || resp.Status() != "200 OK" {
+		if resp.StatusCode() == 201 || resp.StatusCode() == http.StatusCreated {
 			returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "404", methodUsed, endpoint, reqBody, []byte(""), "User Not Found", respErr, resp)
 			if !returnMessage.Data.IsSuccess {
 				return returnMessage, userHCISDetails
@@ -81,7 +81,6 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}
-
 	}
 
 	// Unmarshal the response body into the struct
