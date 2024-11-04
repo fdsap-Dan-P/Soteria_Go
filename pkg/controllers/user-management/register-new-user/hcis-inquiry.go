@@ -74,15 +74,14 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}
-	}
 
-	if resp.StatusCode() != 201 {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "404", methodUsed, endpoint, reqBody, []byte(""), "User Not Found", respErr, resp)
-		if !returnMessage.Data.IsSuccess {
-			return returnMessage, userHCISDetails
+		if resp.StatusCode() != 201 {
+			returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "404", methodUsed, endpoint, reqBody, []byte(""), "User Not Found", respErr, resp)
+			if !returnMessage.Data.IsSuccess {
+				return returnMessage, userHCISDetails
+			}
 		}
 	}
-
 	// Unmarshal the response body into the struct
 	if unmarshallErr := json.Unmarshal(resp.Body(), &userHCISInfo); unmarshallErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "310", methodUsed, endpoint, reqBody, []byte(""), "", unmarshallErr, unmarshallErr.Error())
