@@ -75,7 +75,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 			return returnMessage, userHCISDetails
 		}
 
-		if resp.StatusCode() != 201 {
+		if resp.StatusCode() == 201 {
 			returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "404", methodUsed, endpoint, reqBody, []byte(""), "User Not Found", respErr, resp)
 			if !returnMessage.Data.IsSuccess {
 				return returnMessage, userHCISDetails
