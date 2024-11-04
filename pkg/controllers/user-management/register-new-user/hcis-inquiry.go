@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
@@ -64,7 +65,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 		}
 	}
 
-	if resp.StatusCode() != 200 || resp.IsSuccess() {
+	if resp.StatusCode() != http.StatusOK {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "405", methodUsed, endpoint, reqBody, []byte(""), "Request Failed To HCIS", respErr, resp)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
