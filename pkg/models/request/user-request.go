@@ -2,8 +2,14 @@ package request
 
 type (
 	UserRegistrationRequest struct {
-		Username string `json:"username"`
-		Staff_id string `json:"staff_id"`
+		Username         string `json:"username"`
+		First_name       string `json:"first_name"`
+		Middle_name      string `json:"middle_name"`
+		Last_name        string `json:"last_name"`
+		Email            string `json:"email"`
+		Phone_no         string `json:"phone_no"`
+		Staff_id         string `json:"staff_id"`
+		Institution_code string `json:"institution_code"`
 	}
 
 	LoginCredentialsRequest struct {
