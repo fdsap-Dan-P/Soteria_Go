@@ -225,7 +225,7 @@ func ResetUserPasswordToTemporary(c *fiber.Ctx) error {
 
 	fmt.Println("- - - - - - - - PASSWORD TRACING - - - - - - - - ")
 	fmt.Println("PROJECT NAME: SOTERIA")
-	fmt.Println("FUNCTION NAME: SetTempPassword")
+	fmt.Println("FUNCTION NAME: ResetUserPasswordToTemporary")
 	fmt.Println("TEMPOPARY PASSWORD: ", isPassSetTemp.Data.Message)
 	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - ")
 
