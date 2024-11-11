@@ -51,7 +51,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		}
 	}
 
-	fmt.Println("REQUEST BODY: ", string(newUserRequestByte))
+	fmt.Println("ADD USER REQUEST BODY: ", string(newUserRequestByte))
 
 	// check if staff_id has value
 	if strings.TrimSpace(newUserRequest.Staff_id) == "" {
