@@ -119,6 +119,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		// 	}
 		// }
 		fmt.Println("CONDITION 1")
+		fmt.Println("RETCODE: ", hcisResponseStatus.RetCode)
 		if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_code = ?", newUserRequest.Institution_code).Scan(&instiDetails).Error; fetchErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 			if !returnMessage.Data.IsSuccess {
@@ -149,9 +150,40 @@ func RegisterUser(c *fiber.Ctx) error {
 		}
 	} else if !hcisResponseStatus.Data.IsSuccess {
 		fmt.Println("CONDITION 2")
+		fmt.Println("RETCODE: ", hcisResponseStatus.RetCode)
+
+		if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_code = ?", newUserRequest.Institution_code).Scan(&instiDetails).Error; fetchErr != nil {
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		if instiDetails.Institution_id == 0 {
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Code Not Foound", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		// register the user
+		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, newUserRequest.Phone_no, newUserRequest.Staff_id, instiDetails.Institution_id, hashTempPassword, true, "").Scan(&remark).Error; insertErr != nil {
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		if remark.Remark != "Success" {
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
 		return c.JSON(hcisResponseStatus)
 	} else {
 		fmt.Println("CONDITION 3")
+		fmt.Println("RETCODE: ", hcisResponseStatus.RetCode)
 		// register the user
 		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, hcisResponseDeatails.Staff_id, hcisResponseDeatails.Institution_id, hashTempPassword, true, "").Scan(&remark).Error; insertErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
