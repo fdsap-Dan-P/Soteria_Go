@@ -51,6 +51,8 @@ func RegisterUser(c *fiber.Ctx) error {
 		}
 	}
 
+	fmt.Println("REQUEST BODY: ", string(newUserRequestByte))
+
 	// check if staff_id has value
 	if strings.TrimSpace(newUserRequest.Staff_id) == "" {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Missing", nil, nil)
@@ -140,7 +142,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		}
 
 		if remark.Remark != "Success" {
-			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
 			}
