@@ -32,6 +32,12 @@ func SetTempPassword(userId int, username, instiCode, appCode, moduleName, metho
 		}
 	}
 
+	fmt.Println("- - - - - - - - PASSWORD TRACING - - - - - - - - ")
+	fmt.Println("PROJECT NAME: SOTERIA")
+	fmt.Println("FUNCTION NAME: SetTempPassword")
+	fmt.Println("TEMPOPARY PASSWORD: ", tempPassword)
+	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - ")
+
 	successResp := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "204", methodUsed, endpoint, []byte(""), []byte(""), tempPassword, nil, nil)
 
 	return successResp
