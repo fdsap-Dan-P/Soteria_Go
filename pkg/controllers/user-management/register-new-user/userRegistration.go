@@ -143,7 +143,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		}
 
 		if remark.Remark != "Success" {
-			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, remark)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
 			}
@@ -163,7 +163,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		}
 
 		if remark.Remark != "Success" {
-			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, remark)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
 			}

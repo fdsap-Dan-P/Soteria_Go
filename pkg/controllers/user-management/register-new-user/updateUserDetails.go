@@ -138,7 +138,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	if remark.Remark != "Success" {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf(remark.Remark), remark)
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, remark)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
