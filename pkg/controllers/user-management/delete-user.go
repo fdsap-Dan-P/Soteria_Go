@@ -12,7 +12,6 @@ import (
 func DeleteUser(c *fiber.Ctx) error {
 	userIdentity := c.Params("user_identity")
 	userDetails := response.UserDetails{}
-	remark := response.DBFuncResponse{}
 
 	methodUsed := c.Method()
 	endpoint := c.Path()
@@ -42,7 +41,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		}
 	}
 
-	if deletErr := database.DBConn.Raw("DELETE FROM user_accounts WHERE username = ? OR staff_id = ? AS remark", userIdentity, userIdentity).Scan(&remark).Error; deletErr != nil {
+	if deletErr := database.DBConn.Raw("DELETE FROM user_accounts WHERE username = ? OR staff_id = ? AS remark", userIdentity, userIdentity).Scan(&userDetails).Error; deletErr != nil {
 		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.App_code, validationDetails.Insti_code, moduleName, funcName, "314", methodUsed, endpoint, []byte(""), []byte(""), "", deletErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
