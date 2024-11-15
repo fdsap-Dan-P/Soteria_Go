@@ -1,16 +1,17 @@
 package registernewuser
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
 	"strings"
-
-	"github.com/go-resty/resty/v2"
 )
 
 func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, endpoint string, reqBody []byte) (response.ReturnModel, response.UserDetails) {
@@ -41,19 +42,48 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 		}
 	}
 
-	// Create a new Resty client
-	client := resty.New()
+	// // Create a new Resty client
+	// client := resty.New()
+
+	// // Send the request
+	// resp, respErr := client.R().
+	// 	SetHeader("Content-Type", "application/json").
+	// 	SetHeader("Authorization", hcis_authHeader).
+	// 	SetBody(hcis_reqBodyByte).
+	// 	Post("https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo")
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{Transport: tr}
+
+	// Create the HTTP request and set headers
+	req, reqErr := http.NewRequest("POST", "https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo", bytes.NewBuffer(hcis_reqBodyByte))
+	if reqErr != nil {
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "318", methodUsed, endpoint, hcis_reqBodyByte, []byte(""), "", reqErr, req)
+		if !returnMessage.Data.IsSuccess {
+			return (returnMessage), userHCISDetails
+		}
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", hcis_authHeader)
+
+	fmt.Println(req)
 
 	// Send the request
-	resp, respErr := client.R().
-		SetHeader("Content-Type", "application/json").
-		SetHeader("Authorization", hcis_authHeader).
-		SetBody(hcis_reqBodyByte).
-		Post("https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo")
+	resp, respErr := client.Do(req)
+	if respErr != nil {
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "317", methodUsed, endpoint, hcis_reqBodyByte, []byte(""), "", respErr, resp)
+		if !returnMessage.Data.IsSuccess {
+			return returnMessage, userHCISDetails
+		}
+	}
+	defer resp.Body.Close()
 
 	// check the response from HCIS
 	fmt.Println("- - - - - - - - - - HCIS Response - - - - - - - - - - -")
-	fmt.Println("STATUS: ", resp.StatusCode())
+	fmt.Println("STATUS: ", resp.StatusCode)
 	fmt.Println("SUCCESS \n", resp)
 	fmt.Println("ERROR: ", respErr)
 	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - -")
@@ -67,18 +97,26 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 
 	// Check if the request was successful (status code 200)
 	fmt.Println("- - - - - STATUS CODE - - - - - - -")
-	fmt.Println("resp.StatusCode: ", resp.StatusCode())
+	fmt.Println("resp.StatusCode: ", resp.StatusCode)
 	fmt.Println("http.StatusOK: ", http.StatusOK)
 	// if resp.StatusCode() >= 300 || resp.StatusCode() < 200 {
-	if resp.StatusCode() != 200 {
+	if resp.StatusCode != 200 {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "405", methodUsed, endpoint, reqBody, []byte(""), "Request Failed To HCIS", respErr, resp)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}
 	}
 
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "317", methodUsed, endpoint, (reqBody), []byte(""), "Reading Soteria Response Failed", err, nil)
+		if !returnMessage.Data.IsSuccess {
+			return returnMessage, userHCISDetails
+		}
+	}
+
 	// Unmarshal the response body into the struct
-	if unmarshallErr := json.Unmarshal(resp.Body(), &userHCISInfo); unmarshallErr != nil {
+	if unmarshallErr := json.Unmarshal(body, &userHCISInfo); unmarshallErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "310", methodUsed, endpoint, reqBody, []byte(""), "", unmarshallErr, unmarshallErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
