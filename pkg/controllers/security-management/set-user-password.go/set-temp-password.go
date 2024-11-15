@@ -26,7 +26,7 @@ func SetTempPassword(userId int, username, instiCode, appCode, moduleName, metho
 	}
 
 	if remark.Remark != "Success" {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, []byte(""), []byte(""), "", fmt.Errorf(remark.Remark), remark)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, []byte(""), []byte(""), "", fmt.Errorf("%s", remark.Remark), remark)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
