@@ -65,6 +65,13 @@ func RegisterUser(c *fiber.Ctx) error {
 		newUserRequest.Username = newUserRequest.Staff_id
 	}
 
+	if strings.TrimSpace(newUserRequest.Institution_code) == "" {
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Code Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
 	// validate the staff id format
 	isStaffIdValidated := validations.StaffIdValidation(newUserRequest.Staff_id, moduleName, methodUsed, endpoint)
 	if !isStaffIdValidated {
@@ -195,7 +202,9 @@ func RegisterUser(c *fiber.Ctx) error {
 		return c.JSON(successResp)
 	}
 
-	fmt.Println(successResp)
+	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - -")
+	fmt.Println("successResp", successResp)
+	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - -")
 
 	return c.JSON(successResp)
 }
