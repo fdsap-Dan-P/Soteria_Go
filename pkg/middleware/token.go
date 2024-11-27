@@ -96,7 +96,7 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 	}
 
 	if !token.Valid {
-		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf(tokenString), token)
+		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf("%s", tokenString), token)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
@@ -116,7 +116,7 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 		}
 	}
 
-	returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf(tokenString), token)
+	returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf("%s", tokenString), token)
 	if !returnMessage.Data.IsSuccess {
 		return (returnMessage)
 	}
@@ -153,7 +153,7 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 		}
 
 		if remark.Remark != "Success" {
-			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", fmt.Errorf(remark.Remark), remark)
+			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", fmt.Errorf("%s", remark.Remark), remark)
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
 			}
@@ -167,7 +167,7 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 		}
 
 		if remark.Remark != "Success" {
-			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "304", methodUsed, endpoint, reqBody, []byte(""), "", fmt.Errorf(remark.Remark), remark)
+			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "304", methodUsed, endpoint, reqBody, []byte(""), "", fmt.Errorf("%s", remark.Remark), remark)
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
 			}
