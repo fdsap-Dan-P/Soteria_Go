@@ -121,7 +121,7 @@ func Login(c *fiber.Ctx) error {
 
 	hashPasswordRequest := hash.SHA256(credentialRequest.Password)
 	if userPasswordDetails.User_id == 0 || userPasswordDetails.Password_hash != hashPasswordRequest {
-		returnMessage := middleware.ResponseData(credentialRequest.User_identity, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Not Found", nil, userDetails)
+		returnMessage := middleware.ResponseData(credentialRequest.User_identity, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "103", methodUsed, endpoint, credentialRequestByte, []byte(""), "Invalid Credential", nil, userDetails)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
