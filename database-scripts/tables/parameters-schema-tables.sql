@@ -18,38 +18,18 @@ create table parameters.insti_app_config(
     updated_at timestamp default current_timestamp
 );
 
-insert into parameters.system_config
-(config_code, config_name, config_description, config_type, config_value, config_insti_code, config_app_code)
-VALUES 
-('jwt', 'Token', 'Time', 'Minute', '1440', 'rbi', 'data-plaform'),
-('jwt', 'Token', 'Time', 'Minute', '1440', 'rbi', 'cagabay'),
+insert into parameters.insti_app_config
+(config_id, config_value, config_insti_code, config_app_code)
+values 
+(1, '1440', '2162', 'OR0003-1732775142'),
+(2, '90', '2162', 'OR0003-1732775142'),
+(3, 'true', '2162', 'OR0003-1732775142'),
+(4, 'true', '2162', 'OR0003-1732775142'),
+(5, 'true', '2162', 'OR0003-1732775142'),
+(6, 'true', '2162', 'OR0003-1732775142'),
+(7, '8', '2162', 'OR0003-1732775142'),
+(8, '5', '2162', 'OR0003-1732775142')
 
-('pass_exp', 'Password Expiration', 'Password Active Duration Starting Password Creation', 'Day', '90', 'rbi', 'data-plaform'),
-('pass_exp', 'Password Expiration', 'Password Active Duration Starting Password Creation', 'Day', '90', 'rbi', 'cagabay'),
-
-('pass_sym', 'Symbol Validation', 'Ensure the password contains at least one symbol character', 'bool', 'true', 'rbi', 'data-plaform'),
-('pass_sym', 'Symbol Validation', 'Ensure the password contains at least one symbol character', 'bool', 'true', 'rbi', 'cagabay'),
-
-('pass_upc', 'Uppercase Validation', 'Ensure the password contains at least one uppercase character', 'bool', 'true', 'rbi', 'data-plaform'),
-('pass_upc', 'Uppercase Validation', 'Ensure the password contains at least one uppercase character', 'bool', 'true', 'rbi', 'cagabay'),
-
-('pass_lwr', 'Lowercase Validation', 'Ensure the password contains at least one lowercase character', 'bool', 'true', 'rbi', 'data-plaform'),
-('pass_lwr', 'Lowercase Validation', 'Ensure the password contains at least one lowercase character', 'bool', 'true', 'rbi', 'cagabay'),
-
-('pass_num', 'Number Validation', 'Ensure the password contains at least one number character', 'bool', 'true', 'rbi', 'data-plaform'),
-('pass_num', 'Number Validation', 'Ensure the password contains at least one number character', 'bool', 'true', 'rbi', 'cagabay'),
-
-('pass_min', 'Minimum Character', 'Setting password minimum character requirement', 'Numeric', '8', 'rbi', 'data-plaform'),
-('pass_min', 'Minimum Character', 'Setting password minimum character requirement', 'Numeric', '8', 'rbi', 'cagabay'),
-
-('via_email', 'Via Email', 'Reset Password via redirect link', 'bool', 'true', 'rbi', 'data-plaform'),
-('via_email', 'Via Email', 'Reset Password via redirect link', 'bool', 'true', 'rbi', 'cagabay'),
-
-('via_sms', 'Via SMS', 'Reset Password via SMS', 'bool', 'true', 'rbi', 'data-plaform'),
-('via_sms', 'Via SMS', 'Reset Password via SMS', 'bool', 'true', 'rbi', 'cagabay'),
-
-('pass_reuse', 'Password Reusability', 'Minimum Password Reusability', 'Numeric', '3', 'rbi', 'data-plaform'),
-('pass_reuse', 'Password Reusability', 'Minimum Password Reusability', 'Numeric', '3', 'rbi', 'cagabay');
 
 CREATE TABLE parameters.return_message (
     retcode TEXT,
