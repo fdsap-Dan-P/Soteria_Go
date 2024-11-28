@@ -103,5 +103,14 @@ func MemberVerification(c *fiber.Ctx) error {
 		userRequest.Is_member = true
 	}
 
-	return c.JSON(userRequest)
+	return c.JSON(response.ResponseModel{
+		RetCode: "200",
+		Message: "Successful",
+		Data: response.DataModel{
+			Message:   "Successfully Verified",
+			IsSuccess: true,
+			Error:     nil,
+			Details:   userRequest,
+		},
+	})
 }
