@@ -61,7 +61,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	// Create the HTTP request and set headers
 	req, reqErr := http.NewRequest("POST", "https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo", bytes.NewBuffer(hcis_reqBodyByte))
 	if reqErr != nil {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "318", methodUsed, endpoint, hcis_reqBodyByte, []byte(""), "", reqErr, userHCISDetails)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "405", methodUsed, endpoint, hcis_reqBodyByte, []byte(""), "", reqErr, userHCISDetails)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage), userHCISDetails
 		}
@@ -108,7 +108,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "317", methodUsed, endpoint, (reqBody), []byte(""), "Reading Soteria Response Failed", err, userHCISDetails)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "317", methodUsed, endpoint, (reqBody), []byte(""), "", err, userHCISDetails)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
 		}

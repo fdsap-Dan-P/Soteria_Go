@@ -96,7 +96,7 @@ func RegisterUser(c *fiber.Ctx) error {
 
 		return c.JSON(response.ResponseModel{
 			RetCode: "403",
-			Message: "Validation Failed",
+			Message: "Bad Request",
 			Data: response.DataModel{
 				Message:   "Username or Employee ID Already Exists",
 				IsSuccess: false,
