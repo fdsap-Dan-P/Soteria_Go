@@ -57,6 +57,10 @@ func SetupPublicRoutes(app *fiber.App) {
 	setParams := secManagement.Group("/parameters")
 	setParams.Post("/update", setparameters.SetParams)
 	setParams.Get("/list", setparameters.ParameterList)
+
+	// OttoKonek Rose
+	member := auth.Group("/member")
+	member.Post("/verify", usermanagement.MemberVerification)
 }
 
 func SetupPublicRoutesB(app *fiber.App) {
