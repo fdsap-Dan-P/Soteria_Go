@@ -13,7 +13,8 @@ import (
 )
 
 func MemberVerification(c *fiber.Ctx) error {
-	userRequest := request.MemberVerificationReques{}
+	userRequest := request.MemberVerificationRequest{}
+	userVerification := response.MemberVerificationResponse{}
 	userDetails := response.UserDetails{}
 
 	methodUsed := c.Method()
@@ -23,67 +24,68 @@ func MemberVerification(c *fiber.Ctx) error {
 
 	// Extraxt the headers
 	apiKey := c.Get("X-API-Key")
-	authHeader := c.Get("Authorization")
 
-	validationStatus, validationDetails := validations.HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint)
+	validationStatus, validationDetails := validations.APIKeyValidation(apiKey, "", "", "", moduleName, methodUsed, endpoint, []byte(""))
 	if !validationStatus.Data.IsSuccess {
 		return c.JSON(validationStatus)
 	}
 
 	// get the request body
 	if parsErr := c.BodyParser(&userRequest); parsErr != nil {
-		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, nil)
+		returnMessage := middleware.ResponseData("", "", validationDetails.Application_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
+	fullName := "Full Name: " + userRequest.First_name + " " + userRequest.Last_name
+
 	// marshal the request body
 	userRequestByte, marshalErr := json.Marshal(userRequest)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "311", methodUsed, endpoint, userRequestByte, []byte(""), "Marshalling Request Body Failed", marshalErr, nil)
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, userRequestByte, []byte(""), "Marshalling Request Body Failed", marshalErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if strings.TrimSpace(userRequest.Phone_no) == "" {
-		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Phone Number Input Missing", nil, nil)
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Phone Number Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if strings.TrimSpace(userRequest.First_name) == "" {
-		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "First Name Input Missing", nil, nil)
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "First Name Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if strings.TrimSpace(userRequest.Last_name) == "" {
-		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Last Name Input Missing", nil, nil)
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Last Name Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if strings.TrimSpace(userRequest.Birthdate) == "" {
-		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Birth Date Input Missing", nil, nil)
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Birth Date Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	// validate the phone number format
-	isPhoneNumberValidated := middleware.NormalizePhoneNumber(userRequest.Phone_no, validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, funcName, methodUsed, endpoint)
+	isPhoneNumberValidated := middleware.NormalizePhoneNumber(userRequest.Phone_no, fullName, "", validationDetails.Application_code, funcName, methodUsed, endpoint)
 	if !isPhoneNumberValidated.Data.IsSuccess {
 		return c.JSON(isPhoneNumberValidated)
 	}
 	normalizedPhonenumber := isPhoneNumberValidated.Data.Message
 
 	// format the birthdate
-	isBirthDateValid := middleware.FormatingDate(userRequest.Birthdate, validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, methodUsed, endpoint)
+	isBirthDateValid := middleware.FormatingDate(userRequest.Birthdate, fullName, "", validationDetails.Application_code, moduleName, funcName, methodUsed, endpoint)
 	if !isBirthDateValid.Data.IsSuccess {
 		return c.JSON(isBirthDateValid)
 	}
@@ -91,16 +93,23 @@ func MemberVerification(c *fiber.Ctx) error {
 
 	// check if user is a member
 	if fetchErr := database.DBConn.Raw("SELECT * FROM user_details WHERE phone_no = ? OR (first_name ILIKE ? AND last_name ILIKE ? AND birthdate = ?)", normalizedPhonenumber, userRequest.First_name, userRequest.Last_name, formattedBirthDate).Scan(&userDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, userRequestByte, []byte(""), "", fetchErr, nil)
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, userRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
+	userVerification.Phone_no = userDetails.Phone_no
+	userVerification.First_name = userDetails.First_name
+	userVerification.Last_name = userDetails.Last_name
+	userVerification.Birthdate = userDetails.Birthdate
+
 	if userDetails.User_id == 0 {
 		userRequest.Is_member = false
 	} else {
 		userRequest.Is_member = true
+		userVerification.Institution_code = userDetails.Institution_code
+		userVerification.Institution_name = userDetails.Institution_name
 	}
 
 	return c.JSON(response.ResponseModel{
@@ -110,7 +119,7 @@ func MemberVerification(c *fiber.Ctx) error {
 			Message:   "Successfully Verified",
 			IsSuccess: true,
 			Error:     nil,
-			Details:   userRequest,
+			Details:   userVerification,
 		},
 	})
 }

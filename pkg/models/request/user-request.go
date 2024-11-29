@@ -22,7 +22,7 @@ type (
 		New_password string `json:"new_password"`
 	}
 
-	MemberVerificationReques struct {
+	MemberVerificationRequest struct {
 		Phone_no   string `json:"phone_no"`
 		First_name string `json:"first_name"`
 		Last_name  string `json:"last_name"`
