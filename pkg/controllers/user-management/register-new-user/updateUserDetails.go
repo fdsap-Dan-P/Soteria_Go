@@ -8,7 +8,6 @@ import (
 	"soteria_go/pkg/models/request"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
-	"soteria_go/pkg/utils/go-utils/hash"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -80,6 +79,13 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		newUserRequest.Username = newUserRequest.Staff_id
 	}
 
+	if strings.TrimSpace(newUserRequest.Institution_code) == "" {
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Code Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
 	// validate the staff id format
 	isStaffIdValidated := validations.StaffIdValidation(newUserRequest.Staff_id, moduleName, methodUsed, endpoint)
 	if !isStaffIdValidated {
@@ -125,12 +131,8 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		return c.JSON(hcisResponseStatus)
 	}
 
-	// generate user's temp password
-	tempPassword := middleware.PasswordGeneration()
-	hashTempPassword := hash.SHA256(tempPassword)
-
 	// register the user
-	if insertErr := database.DBConn.Raw("SELECT public.update_user_info(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, newUserRequest.Staff_id, hcisResponseDeatails.Institution_id, hashTempPassword, true, "", userIdToBeUpdated).Scan(&remark).Error; insertErr != nil {
+	if insertErr := database.DBConn.Raw("SELECT public.update_user_info(?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, newUserRequest.Staff_id, hcisResponseDeatails.Institution_id, userIdToBeUpdated).Scan(&remark).Error; insertErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -151,9 +153,6 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 			return c.JSON(returnMessage)
 		}
 	}
-
-	// append the temp password to the user's details
-	UserDetails.Password = tempPassword
 
 	// marshal the response body
 	UserDetailsByte, marshalErr := json.Marshal(UserDetails)
