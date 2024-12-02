@@ -16,7 +16,7 @@ import (
 func SetupPublicRoutes(app *fiber.App) {
 
 	// Endpoints
-	appName := app.Group("/soteria-go")
+	appName := app.Group("/cagabay-ua")
 	apiEndpoint := appName.Group("/api")
 	publicEndpoint := apiEndpoint.Group("/public")
 	v1Endpoint := publicEndpoint.Group("/v1")
