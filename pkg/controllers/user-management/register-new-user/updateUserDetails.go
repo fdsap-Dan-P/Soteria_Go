@@ -163,7 +163,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		}
 	}
 
-	successResp := middleware.ResponseData(UserDetails.Username, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, UserDetails)
+	successResp := middleware.ResponseData(UserDetails.Username, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "204", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, UserDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
