@@ -133,7 +133,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 
 	// register the user
 	if insertErr := database.DBConn.Raw("SELECT public.update_user_info(?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, newUserRequest.Staff_id, hcisResponseDeatails.Institution_id, userIdToBeUpdated).Scan(&remark).Error; insertErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
