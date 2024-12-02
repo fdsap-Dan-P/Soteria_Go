@@ -96,7 +96,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// validate if staff id already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? AND user_id != ?", newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE (username = ? OR staff_id = ?) AND user_id != ?", newUserRequest.Username, newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
