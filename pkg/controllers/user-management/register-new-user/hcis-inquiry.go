@@ -29,8 +29,8 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	}
 
 	// Basic auth credentials
-	hcis_username := "fdsap_apis"
-	hcis_password := "unifiedauth"
+	hcis_username := "unifiedauth"
+	hcis_password := "P@ssword123"
 	hcis_authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(hcis_username+":"+hcis_password))
 
 	hcis_reqBody := map[string]string{"StaffID": staffId}
