@@ -144,14 +144,14 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 
 	// register the user
 	if insertErr := database.DBConn.Raw("SELECT public.update_user_info(?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, newUserRequest.Phone_no, newUserRequest.Staff_id, institutionDetails.Institution_id, userIdToBeUpdated).Scan(&remark).Error; insertErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if remark.Remark != "Success" {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, remark)
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf("%s", remark.Remark), nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
