@@ -128,8 +128,8 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		// or forget the password if you dont remember it
 	}
 
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.institution_details WHERE institution_code = ?", newUserRequest.Institution_code).Scan(&institutionDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM offices_mapping.institution_details WHERE institution_code = ?", newUserRequest.Institution_code).Scan(&institutionDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
