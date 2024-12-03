@@ -43,7 +43,7 @@ func SetParams(c *fiber.Ctx) error {
 	// marshal the request body
 	paramRequestByte, marshalErr := json.Marshal(paramRequest)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Request Body Failed", marshalErr, marshalErr.Error())
+		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Request Body Failed", marshalErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -51,14 +51,14 @@ func SetParams(c *fiber.Ctx) error {
 
 	// validate if request body is not empty
 	if strings.TrimSpace(paramRequest.Config_code) == "" {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Config Code Input Missing", marshalErr, marshalErr.Error())
+		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Config Code Input Missing", marshalErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if strings.TrimSpace(paramRequest.Config_value) == "" {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Config Value Input Missing", marshalErr, marshalErr.Error())
+		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "401", methodUsed, endpoint, paramRequestByte, []byte(""), "Config Value Input Missing", marshalErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -66,7 +66,7 @@ func SetParams(c *fiber.Ctx) error {
 
 	// check first if config code exist
 	if fetchErr := database.DBConn.Raw("SELECT * FROM parameters.system_config WHERE config_code = ?", paramRequest.Config_code).Scan(&paramDetaills).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, paramRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		returnMessage := middleware.ResponseData(headerValidationResponse.Username, headerValidationResponse.Insti_code, headerValidationResponse.App_code, moduleName, funcName, "302", methodUsed, endpoint, paramRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
