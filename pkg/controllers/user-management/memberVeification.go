@@ -89,10 +89,10 @@ func MemberVerification(c *fiber.Ctx) error {
 	if !isBirthDateValid.Data.IsSuccess {
 		return c.JSON(isBirthDateValid)
 	}
-	formattedBirthDate := isBirthDateValid.Data.Message
+	// formattedBirthDate := isBirthDateValid.Data.Message
 
 	// check if user is a member
-	if fetchErr := database.DBConn.Raw("SELECT * FROM user_details WHERE phone_no = ? OR (first_name ILIKE ? AND last_name ILIKE ? AND birthdate = ?)", normalizedPhonenumber, userRequest.First_name, userRequest.Last_name, formattedBirthDate).Scan(&userDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM user_details WHERE phone_no = ? AND first_name ILIKE ? AND last_name ILIKE ?", normalizedPhonenumber, userRequest.First_name, userRequest.Last_name).Scan(&userDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, userRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
