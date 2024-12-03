@@ -17,6 +17,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	userIdentity := c.Params("user_identity")
 	newUserRequest := request.UserRegistrationRequest{}
 	UserDetails := response.UserDetails{}
+	UserDetailsChecker := response.UserDetails{}
 	remark := response.DBFuncResponse{}
 
 	methodUsed := c.Method()
@@ -96,7 +97,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// validate if staff id already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE (username = ? OR staff_id = ?) AND user_id != ?", newUserRequest.Username, newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE (username = ? OR staff_id = ?) AND user_id != ?", newUserRequest.Username, newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -105,8 +106,8 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 
 	fmt.Println("UserDetails: ", UserDetails.User_id)
 
-	if strings.TrimSpace(UserDetails.Staff_id) != "" {
-		UserDetails.User_id = 0 // data privacy
+	if strings.TrimSpace(UserDetailsChecker.Staff_id) != "" {
+		UserDetailsChecker.User_id = 0 // data privacy
 
 		return c.JSON(response.ResponseModel{
 			RetCode: "403",
@@ -115,7 +116,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 				Message:   "Username or Employee ID Already Exists",
 				IsSuccess: false,
 				Error:     nil,
-				Details:   UserDetails,
+				Details:   UserDetailsChecker,
 			},
 		})
 
