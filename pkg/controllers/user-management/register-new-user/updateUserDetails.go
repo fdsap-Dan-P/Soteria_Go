@@ -17,6 +17,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	userIdentity := c.Params("user_identity")
 	newUserRequest := request.UserRegistrationRequest{}
 	UserDetails := response.UserDetails{}
+	updatedUserDetails := response.UserDetails{}
 	UserDetailsChecker := response.UserDetails{}
 	remark := response.DBFuncResponse{}
 
@@ -148,7 +149,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// get user details
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ?", newUserRequest.Staff_id, newUserRequest.Username).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ?", newUserRequest.Staff_id, newUserRequest.Username).Scan(&updatedUserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -156,7 +157,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// marshal the response body
-	UserDetailsByte, marshalErr := json.Marshal(UserDetails)
+	UserDetailsByte, marshalErr := json.Marshal(updatedUserDetails)
 	if marshalErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "311", methodUsed, endpoint, newUserRequestByte, []byte(""), "", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
@@ -164,7 +165,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		}
 	}
 
-	successResp := middleware.ResponseData(UserDetails.Username, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "204", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, UserDetails)
+	successResp := middleware.ResponseData(UserDetails.Username, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "204", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Updated User Details", nil, updatedUserDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
