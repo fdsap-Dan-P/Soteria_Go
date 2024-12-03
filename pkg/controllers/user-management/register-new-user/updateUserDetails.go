@@ -19,6 +19,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	UserDetails := response.UserDetails{}
 	updatedUserDetails := response.UserDetails{}
 	UserDetailsChecker := response.UserDetails{}
+	institutionDetails := response.InstitutionDetails{}
 	remark := response.DBFuncResponse{}
 
 	methodUsed := c.Method()
@@ -127,22 +128,30 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		// or forget the password if you dont remember it
 	}
 
-	// get hcis details
-	hcisResponseStatus, hcisResponseDeatails := HcisInquiry(newUserRequest.Staff_id, newUserRequest.Username, "", "", "User Registration", methodUsed, endpoint, newUserRequestByte)
-	if !hcisResponseStatus.Data.IsSuccess {
-		return c.JSON(hcisResponseStatus)
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.institution_details WHERE institution_code = ?", newUserRequest.Institution_code).Scan(&institutionDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if institutionDetails.Institution_id == 0 {
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "404", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Not Found", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
 	}
 
 	// register the user
-	if insertErr := database.DBConn.Raw("SELECT public.update_user_info(?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, newUserRequest.Staff_id, hcisResponseDeatails.Institution_id, userIdToBeUpdated).Scan(&remark).Error; insertErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
+	if insertErr := database.DBConn.Raw("SELECT public.update_user_info(?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, newUserRequest.Phone_no, newUserRequest.Staff_id, institutionDetails.Institution_id, userIdToBeUpdated).Scan(&remark).Error; insertErr != nil {
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if remark.Remark != "Success" {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, remark)
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, remark)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -159,13 +168,13 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	// marshal the response body
 	UserDetailsByte, marshalErr := json.Marshal(updatedUserDetails)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "311", methodUsed, endpoint, newUserRequestByte, []byte(""), "", marshalErr, marshalErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "311", methodUsed, endpoint, newUserRequestByte, []byte(""), "", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	successResp := middleware.ResponseData(UserDetails.Username, hcisResponseDeatails.Institution_code, validationDetails.App_code, moduleName, funcName, "204", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Updated User Details", nil, updatedUserDetails)
+	successResp := middleware.ResponseData(UserDetails.Username, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "204", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Updated User Details", nil, updatedUserDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
