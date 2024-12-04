@@ -105,9 +105,9 @@ func MemberVerification(c *fiber.Ctx) error {
 	userVerification.Birthdate = userDetails.Birthdate
 
 	if userDetails.User_id == 0 {
-		userRequest.Is_member = false
+		userVerification.Is_member = false
 	} else {
-		userRequest.Is_member = true
+		userVerification.Is_member = true
 		userVerification.Institution_code = userDetails.Institution_code
 		userVerification.Institution_name = userDetails.Institution_name
 	}
