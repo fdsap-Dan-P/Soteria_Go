@@ -83,13 +83,6 @@ func Login(c *fiber.Ctx) error {
 		}
 	}
 
-	if userDetails.Institution_id == 0 {
-		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "115", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Institution Details Missing", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
 	if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_id = ?", userDetails.Institution_id).Scan(&instiDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, credentialRequestByte, []byte(""), "", fetchErr, userDetails)
 		if !returnMessage.Data.IsSuccess {

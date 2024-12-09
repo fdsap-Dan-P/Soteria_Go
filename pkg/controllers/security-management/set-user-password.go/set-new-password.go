@@ -177,7 +177,7 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 	}
 
 	userDetails.Password = changePasswordRequest.New_password
-	successResp := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, []byte(""), []byte(""), "Successfully Updated Password", nil, userDetails)
+	successResp := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "204", methodUsed, endpoint, []byte(""), []byte(""), "Successfully Updated Password", nil, userDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
@@ -230,7 +230,7 @@ func ResetUserPasswordToTemporary(c *fiber.Ctx) error {
 	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - ")
 
 	userDetails.Password = isPassSetTemp.Data.Message
-	successResp := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, []byte(""), []byte(""), "Successfully Updated Password", nil, userDetails)
+	successResp := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "204", methodUsed, endpoint, []byte(""), []byte(""), "Successfully Updated Password", nil, userDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
