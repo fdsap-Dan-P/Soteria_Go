@@ -142,7 +142,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	}
 
 	// check if user institution is already in database
-	if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_name = ?", userHCISDetails.Institution_name).First(&instiDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_name = ?", userHCISDetails.Institution_name).Scan(&instiDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr, userHCISDetails)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, userHCISDetails
