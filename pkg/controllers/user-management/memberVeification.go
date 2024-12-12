@@ -1,12 +1,17 @@
 package usermanagement
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/request"
 	"soteria_go/pkg/models/response"
-	"soteria_go/pkg/utils/go-utils/database"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,18 +19,22 @@ import (
 
 func MemberVerification(c *fiber.Ctx) error {
 	userRequest := request.MemberVerificationRequest{}
-	userVerification := response.MemberVerificationResponse{}
 	userDetails := response.UserDetails{}
+
+	userVerification := response.MemberVerificationResponse{}
+	dmUserDetails := response.MemberResponse{}
+	dmUserSavings := response.MemberResponse{}
+	memberDetails := make(map[string]interface{})
 
 	methodUsed := c.Method()
 	endpoint := c.Path()
 	moduleName := "User Management"
-	funcName := "HCIS User Details Provider"
+	funcName := "Member Verification"
 
 	// Extraxt the headers
-	apiKey := c.Get("X-API-Key")
+	requesterApiKey := c.Get("X-API-Key")
 
-	validationStatus, validationDetails := validations.APIKeyValidation(apiKey, "", "", "", moduleName, methodUsed, endpoint, []byte(""))
+	validationStatus, validationDetails := validations.APIKeyValidation(requesterApiKey, "", "", "", moduleName, methodUsed, endpoint, []byte(""))
 	if !validationStatus.Data.IsSuccess {
 		return c.JSON(validationStatus)
 	}
@@ -49,29 +58,8 @@ func MemberVerification(c *fiber.Ctx) error {
 		}
 	}
 
-	if strings.TrimSpace(userRequest.Phone_no) == "" {
+	if strings.TrimSpace(userRequest.Phone_no) == "" && strings.TrimSpace(userRequest.First_name) == "" && strings.TrimSpace(userRequest.Last_name) == "" && strings.TrimSpace(userRequest.Birthdate) == "" {
 		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Phone Number Input Missing", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	if strings.TrimSpace(userRequest.First_name) == "" {
-		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "First Name Input Missing", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	if strings.TrimSpace(userRequest.Last_name) == "" {
-		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Last Name Input Missing", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	if strings.TrimSpace(userRequest.Birthdate) == "" {
-		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Birth Date Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -82,18 +70,83 @@ func MemberVerification(c *fiber.Ctx) error {
 	if !isPhoneNumberValidated.Data.IsSuccess {
 		return c.JSON(isPhoneNumberValidated)
 	}
-	normalizedPhonenumber := isPhoneNumberValidated.Data.Message
+	userRequest.Phone_no = isPhoneNumberValidated.Data.Message
 
 	// format the birthdate
 	isBirthDateValid := middleware.FormatingDate(userRequest.Birthdate, fullName, "", validationDetails.Application_code, moduleName, funcName, methodUsed, endpoint)
 	if !isBirthDateValid.Data.IsSuccess {
 		return c.JSON(isBirthDateValid)
 	}
-	// formattedBirthDate := isBirthDateValid.Data.Message
+	userRequest.Birthdate = isBirthDateValid.Data.Message
 
-	// check if user is a member
-	if fetchErr := database.DBConn.Raw("SELECT * FROM user_details WHERE phone_no = ? AND first_name ILIKE ? AND last_name ILIKE ?", normalizedPhonenumber, userRequest.First_name, userRequest.Last_name).Scan(&userDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, userRequestByte, []byte(""), "", fetchErr, nil)
+	// validate user to data mart
+	// get API key
+	apiKey := os.Getenv("DATA_MART_API_KEY")
+	if strings.TrimSpace(apiKey) == "" {
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, userRequestByte, []byte(""), "API KEY NOT FOUND IN ENVIRONMENT", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	dmMemberVerificationUrl := os.Getenv("DATA_MART_HOST") + "/users/verify-member"
+
+	dmMemberVerificationtr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	dmMemberVerificationClient := &http.Client{Transport: dmMemberVerificationtr}
+
+	// marshal the request body for data mart
+	dmMemberVerificationRequestByte, marshalErr := json.Marshal(userRequest)
+	if marshalErr != nil {
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, userRequestByte, []byte(""), "Marshalling Request Body Failed", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// Create the HTTP request and set headers
+	dmMemberVerificationReq, dmMemberVerificationReqErr := http.NewRequest("POST", dmMemberVerificationUrl, bytes.NewBuffer(dmMemberVerificationRequestByte))
+	if dmMemberVerificationReqErr != nil {
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "318", methodUsed, endpoint, userRequestByte, []byte(""), "", dmMemberVerificationReqErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+	dmMemberVerificationReq.Header.Set("Content-Type", "application/json")
+	dmMemberVerificationReq.Header.Set("X-API-Key", apiKey)
+
+	fmt.Println(dmMemberVerificationReq)
+
+	// Send the request
+	dmMemberVerificationResp, dmMemberVerificationRespErr := dmMemberVerificationClient.Do(dmMemberVerificationReq)
+	if dmMemberVerificationRespErr != nil {
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "317", methodUsed, endpoint, userRequestByte, []byte(""), "", dmMemberVerificationRespErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+	defer dmMemberVerificationResp.Body.Close()
+
+	if dmMemberVerificationResp.Status != "200 OK" {
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "405", methodUsed, endpoint, userRequestByte, []byte(""), "", dmMemberVerificationRespErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	dmMemberVerificationBody, dmMemberVerificationErr := ioutil.ReadAll(dmMemberVerificationResp.Body)
+	if dmMemberVerificationErr != nil {
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "317", methodUsed, endpoint, userRequestByte, []byte(""), "Reading Data Mart Response Failed", dmMemberVerificationErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// soteriaResponse_v2 := map[string]string{}
+	if err := json.Unmarshal(dmMemberVerificationBody, &dmUserDetails); err != nil {
+		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "310", methodUsed, endpoint, userRequestByte, []byte(""), "", err, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -111,6 +164,82 @@ func MemberVerification(c *fiber.Ctx) error {
 		userVerification.Institution_code = userDetails.Institution_code
 		userVerification.Institution_name = userDetails.Institution_name
 	}
+
+	memberDetails["member_details"] = dmUserDetails.Data.Details
+
+	if strings.TrimSpace(dmUserDetails.Data.Details.Cid) != "" {
+		dmMemberSavingRequestBody := request.MemberVerificationRequest{
+			Cid:              dmUserDetails.Data.Details.Cid,
+			Institution_code: dmUserDetails.Data.Details.Insti_code,
+		}
+		// get member's saving account details
+		dmMemberSavingUrl := os.Getenv("DATA_MART_HOST") + "/users/saving-account"
+
+		dmMemberSavingtr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+
+		dmMemberSavingClient := &http.Client{Transport: dmMemberSavingtr}
+
+		// marshal the request body for data mart
+		dmMemberSavingRequestByte, marshalErr := json.Marshal(dmMemberSavingRequestBody)
+		if marshalErr != nil {
+			returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, userRequestByte, []byte(""), "Marshalling Request Body Failed", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		// Create the HTTP request and set headers
+		dmMemberSavingReq, dmMemberSavingReqErr := http.NewRequest("POST", dmMemberSavingUrl, bytes.NewBuffer(dmMemberSavingRequestByte))
+		if dmMemberVerificationReqErr != nil {
+			returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "318", methodUsed, endpoint, userRequestByte, []byte(""), "", dmMemberSavingReqErr, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+		dmMemberSavingReq.Header.Set("Content-Type", "application/json")
+		dmMemberSavingReq.Header.Set("X-API-Key", apiKey)
+
+		fmt.Println(dmMemberSavingReq)
+
+		// Send the request
+		dmMemberSavingResp, dmMemberSavingRespErr := dmMemberSavingClient.Do(dmMemberSavingReq)
+		if dmMemberVerificationRespErr != nil {
+			returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "317", methodUsed, endpoint, userRequestByte, []byte(""), "", dmMemberSavingRespErr, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+		defer dmMemberSavingResp.Body.Close()
+
+		if dmMemberVerificationResp.Status != "200 OK" {
+			returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "405", methodUsed, endpoint, userRequestByte, []byte(""), "", dmMemberSavingRespErr, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		dmMemberSavingBody, dmMemberSavingErr := ioutil.ReadAll(dmMemberVerificationResp.Body)
+		if dmMemberVerificationErr != nil {
+			returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "317", methodUsed, endpoint, userRequestByte, []byte(""), "Reading Data Mart Response Failed", dmMemberSavingErr, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		// soteriaResponse_v2 := map[string]string{}
+		if err := json.Unmarshal(dmMemberSavingBody, &dmUserSavings); err != nil {
+			returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "310", methodUsed, endpoint, userRequestByte, []byte(""), "", err, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		memberDetails["saving_details"] = dmUserSavings.Data.Details
+	}
+
+	userVerification.Member_details = memberDetails
 
 	return c.JSON(response.ResponseModel{
 		RetCode: "200",

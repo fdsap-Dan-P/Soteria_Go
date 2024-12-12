@@ -23,10 +23,11 @@ type (
 	}
 
 	MemberVerificationRequest struct {
-		Phone_no   string `json:"phone_no"`
-		First_name string `json:"first_name"`
-		Last_name  string `json:"last_name"`
-		Birthdate  string `json:"birthdate"`
-		Is_member  bool   `json:"is_member"`
+		First_name       string `json:"first_ame,omitempty"`
+		Last_name        string `json:"last_name,omitempty"`
+		Birthdate        string `json:"birthdate,omitempty"`
+		Phone_no         string `json:"phone_no,omitempty"`
+		Cid              string `json:"cid,omitempty"`
+		Institution_code string `json:"institution_code"`
 	}
 )

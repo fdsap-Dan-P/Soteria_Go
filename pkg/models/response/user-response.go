@@ -52,12 +52,13 @@ type (
 	}
 
 	MemberVerificationResponse struct {
-		Phone_no         string `json:"phone_no"`
-		First_name       string `json:"first_name"`
-		Last_name        string `json:"last_name"`
-		Birthdate        string `json:"birthdate"`
-		Is_member        bool   `json:"is_member"`
-		Institution_code string `json:"institution_code"`
-		Institution_name string `json:"institution_name"`
+		Phone_no         string      `json:"phone_no"`
+		First_name       string      `json:"first_name"`
+		Last_name        string      `json:"last_name"`
+		Birthdate        string      `json:"birthdate"`
+		Is_member        bool        `json:"is_member"`
+		Institution_code string      `json:"institution_code"`
+		Institution_name string      `json:"institution_name"`
+		Member_details   interface{} `json:"member_details"`
 	}
 )
