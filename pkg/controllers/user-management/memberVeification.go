@@ -12,6 +12,7 @@ import (
 	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/request"
 	"soteria_go/pkg/models/response"
+	"soteria_go/pkg/utils/go-utils/database"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +20,8 @@ import (
 
 func MemberVerification(c *fiber.Ctx) error {
 	userRequest := request.MemberVerificationRequest{}
-	userDetails := response.UserDetails{}
+	// userDetails := response.UserDetails{}
+	instiDetails := response.InstitutionDetails{}
 
 	userVerification := response.MemberVerificationResponse{}
 	dmUserDetails := response.MemberResponse{}
@@ -152,22 +154,29 @@ func MemberVerification(c *fiber.Ctx) error {
 		}
 	}
 
-	userVerification.Phone_no = userDetails.Phone_no
-	userVerification.First_name = userDetails.First_name
-	userVerification.Last_name = userDetails.Last_name
-	userVerification.Birthdate = userDetails.Birthdate
+	userVerification.Phone_no = userRequest.Phone_no
+	userVerification.First_name = userRequest.First_name
+	userVerification.Last_name = userRequest.Last_name
+	userVerification.Birthdate = userRequest.Birthdate
 
-	if userDetails.User_id == 0 {
+	if strings.TrimSpace(dmUserDetails.Data.Details.Cid) == "" {
 		userVerification.Is_member = false
 	} else {
 		userVerification.Is_member = true
-		userVerification.Institution_code = userDetails.Institution_code
-		userVerification.Institution_name = userDetails.Institution_name
-	}
+		memberDetails["member_details"] = dmUserDetails.Data.Details
 
-	memberDetails["member_details"] = dmUserDetails.Data.Details
+		// get member's institution details
+		if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_code = ?", dmUserDetails.Data.Details.Insti_code).Scan(&instiDetails).Error; fetchErr != nil {
+			returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "310", methodUsed, endpoint, userRequestByte, []byte(""), "", fetchErr, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
 
-	if strings.TrimSpace(dmUserDetails.Data.Details.Cid) != "" {
+		userVerification.Institution_code = instiDetails.Institution_code
+		userVerification.Institution_name = instiDetails.Institution_name
+
+		// make request to data mart to  get user's saving account
 		dmMemberSavingRequestBody := request.MemberVerificationRequest{
 			Cid:              dmUserDetails.Data.Details.Cid,
 			Institution_code: dmUserDetails.Data.Details.Insti_code,
@@ -237,9 +246,8 @@ func MemberVerification(c *fiber.Ctx) error {
 		}
 
 		memberDetails["saving_details"] = dmUserSavings.Data.Details
+		userVerification.Member_details = memberDetails
 	}
-
-	userVerification.Member_details = memberDetails
 
 	return c.JSON(response.ResponseModel{
 		RetCode: "200",

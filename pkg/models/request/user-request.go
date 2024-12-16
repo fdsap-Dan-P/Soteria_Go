@@ -28,6 +28,6 @@ type (
 		Birthdate        string `json:"birthdate,omitempty"`
 		Phone_no         string `json:"phone_no,omitempty"`
 		Cid              string `json:"cid,omitempty"`
-		Institution_code string `json:"institution_code"`
+		Institution_code string `json:"institution_code,omitempty"`
 	}
 )
