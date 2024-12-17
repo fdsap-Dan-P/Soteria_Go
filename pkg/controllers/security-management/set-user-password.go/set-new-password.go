@@ -132,7 +132,7 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 
 	// check if new password was provided
 	if strings.TrimSpace(changePasswordRequest.New_password) == "" {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "New Password Missing", nil, nil)
+		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "New Password Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -140,7 +140,7 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 
 	// check if old password was provided
 	if strings.TrimSpace(changePasswordRequest.Old_password) == "" {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Old Password Missing", nil, nil)
+		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Current Password Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -165,7 +165,7 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 
 	// compare the inputted old password on whats in db
 	if userPasswordDetails.Password_hash != newHashedPassword {
-		returnMessage := middleware.ResponseData(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "103", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Invalid Old Password", nil, nil)
+		returnMessage := middleware.ResponseData(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "103", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Invalid Current Password", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
