@@ -5,7 +5,8 @@ import (
 	"time"
 )
 
-func FormatingDate(dateString, username, instiCode, appCode, moduleName, funcName, methodUsed, endpoint string) response.ReturnModel {
+func FormatingDate(dateString, username, instiCode, appCode, moduleName, methodUsed, endpoint string) response.ReturnModel {
+	funcName := "Formating Date"
 
 	// List of supported date layouts
 	dateLayouts := []string{

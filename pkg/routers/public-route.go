@@ -7,6 +7,7 @@ import (
 	setuserpassword "soteria_go/pkg/controllers/security-management/set-user-password.go"
 	userlogs "soteria_go/pkg/controllers/user-logs"
 	usermanagement "soteria_go/pkg/controllers/user-management"
+	"soteria_go/pkg/controllers/user-management/memberVerification"
 	registernewuser "soteria_go/pkg/controllers/user-management/register-new-user"
 
 	"github.com/gofiber/fiber/v2"
@@ -41,8 +42,9 @@ func SetupPublicRoutes(app *fiber.App) {
 	//--- U S E R    M A N A G E M E N T ---//
 	userManagement := auth.Group("/user-management")
 	userManagement.Post("/hcis-inquiry", registernewuser.HCISUserDetailsProvider)
-	userManagement.Post("/register-new-user", registernewuser.RegisterUser)
-	userManagement.Post("/update-user/:user_identity", registernewuser.UpdateUserDetails)
+	userManagement.Post("/register-new-user/staff", registernewuser.StaffRegistration)
+	userManagement.Post("/register-new-user/non-staff", registernewuser.NonStaffRegistraion)
+	userManagement.Post("/update-user/:user_category/:user_identity", registernewuser.UpdateUserDetails)
 	userManagement.Get("/delete-user/:user_identity", usermanagement.DeleteUser)
 
 	//--- S E C U R I T Y    M A N A G E M E N T ---//
@@ -60,7 +62,7 @@ func SetupPublicRoutes(app *fiber.App) {
 
 	// OttoKonek Rose
 	member := auth.Group("/member")
-	member.Post("/verify", usermanagement.MemberVerification)
+	member.Post("/verify", memberVerification.MemberVerification)
 }
 
 func SetupPublicRoutesB(app *fiber.App) {

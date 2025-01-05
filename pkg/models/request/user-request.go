@@ -10,6 +10,7 @@ type (
 		Phone_no         string `json:"phone_no"`
 		Staff_id         string `json:"staff_id"`
 		Institution_code string `json:"institution_code"`
+		Birthdate        string `json:"birthdate"`
 	}
 
 	LoginCredentialsRequest struct {

@@ -14,6 +14,7 @@ import (
 )
 
 func UpdateUserDetails(c *fiber.Ctx) error {
+	userCategory := c.Params("user_category")
 	userIdentity := c.Params("user_identity")
 	newUserRequest := request.UserRegistrationRequest{}
 	UserDetails := response.UserDetails{}
@@ -38,14 +39,14 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 
 	// check if to be updated exist
 	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ? OR email = ? OR phone_no = ?", userIdentity, userIdentity, userIdentity, userIdentity).Scan(&UserDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if UserDetails.User_id == 0 {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -55,7 +56,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 
 	// parse the request body
 	if parsErr := c.BodyParser(&newUserRequest); parsErr != nil {
-		returnMessage := middleware.ResponseData("", "", validationDetails.App_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -64,87 +65,173 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	// marshal the request body
 	newUserRequestByte, marshalErr := json.Marshal(newUserRequest)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Request Body Failed", marshalErr, marshalErr.Error())
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Request Body Failed", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	// check if staff_id has value
-	if strings.TrimSpace(newUserRequest.Staff_id) == "" {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Missing", nil, nil)
+	if userCategory == "staff" {
+		// check if staff_id has value
+		if strings.TrimSpace(newUserRequest.Staff_id) == "" {
+			returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Missing", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		if strings.TrimSpace(newUserRequest.Username) == "" {
+			newUserRequest.Username = newUserRequest.Staff_id
+		}
+
+		// validate the staff id format
+		isStaffIdValidated := validations.StaffIdValidation(newUserRequest.Staff_id, moduleName, methodUsed, endpoint)
+		if !isStaffIdValidated {
+			returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "112", methodUsed, endpoint, newUserRequestByte, []byte(""), "Invalid Employee ID", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		// validate if username already exists
+		if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? AND user_id != ?", newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+			returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		if UserDetailsChecker.User_id != 0 {
+			returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Already Exists", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+	} else if userCategory == "non-staff" {
+		if strings.TrimSpace(newUserRequest.Username) == "" {
+			returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Username Missing", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+	} else {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "100", methodUsed, endpoint, newUserRequestByte, []byte(""), "Validation Failed | Invalid User Category", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
-	}
-
-	if strings.TrimSpace(newUserRequest.Username) == "" {
-		newUserRequest.Username = newUserRequest.Staff_id
 	}
 
 	if strings.TrimSpace(newUserRequest.Institution_code) == "" {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Code Missing", nil, nil)
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Code Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	// validate the staff id format
-	isStaffIdValidated := validations.StaffIdValidation(newUserRequest.Staff_id, moduleName, methodUsed, endpoint)
-	if !isStaffIdValidated {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "112", methodUsed, endpoint, newUserRequestByte, []byte(""), "Invalid Employee ID", nil, nil)
+	if strings.TrimSpace(newUserRequest.Phone_no) == "" {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Phone Number Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	// validate if staff id already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE (username = ? OR staff_id = ?) AND user_id != ?", newUserRequest.Username, newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+	if strings.TrimSpace(newUserRequest.Birthdate) == "" {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Brthd Date Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
-	fmt.Println("UserDetails: ", UserDetails.User_id)
+	if strings.TrimSpace(newUserRequest.Email) == "" {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Email Address Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
 
-	if strings.TrimSpace(UserDetailsChecker.Staff_id) != "" {
-		UserDetailsChecker.User_id = 0 // data privacy
+	// format the phone number
+	isPhoneNoFormatted := middleware.NormalizePhoneNumber(newUserRequest.Phone_no, newUserRequest.Username, validationDetails.Insti_code, validationDetails.App_code, funcName, methodUsed, endpoint)
+	if !isPhoneNoFormatted.Data.IsSuccess {
+		return c.JSON(isPhoneNoFormatted)
+	}
 
-		return c.JSON(response.ResponseModel{
-			RetCode: "403",
-			Message: "Validation Failed",
-			Data: response.DataModel{
-				Message:   "Username or Employee ID Already Exists",
-				IsSuccess: false,
-				Error:     nil,
-				Details:   UserDetailsChecker,
-			},
-		})
+	// format the birthdate
+	isBdateFormatted := middleware.FormatingDate(newUserRequest.Birthdate, newUserRequest.Username, validationDetails.Insti_code, validationDetails.App_code, funcName, methodUsed, endpoint)
+	if !isBdateFormatted.Data.IsSuccess {
+		return c.JSON(isBdateFormatted)
+	}
 
-		// send email to the user that statte
-		// tried being added via <app name>
-		// pleaase used the current credentials to login
-		// or forget the password if you dont remember it
+	// validate email address
+	isEmailAddrValid := middleware.ValidateEmail(newUserRequest.Email)
+	if !isEmailAddrValid {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "109", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// validate if username already exists
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE username = ? AND user_id != ?", newUserRequest.Username, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if UserDetailsChecker.User_id != 0 {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Username Already Exists", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// validate if phone number already exists
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE phone_no = ? AND user_id != ?", newUserRequest.Phone_no, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if UserDetailsChecker.User_id != 0 {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Phone Number Already Exists", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// validate if email address already exists
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE email AND user_id != ?", newUserRequest.Email, newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if UserDetailsChecker.User_id != 0 {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Email Address Already Exists", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
 	}
 
 	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM offices_mapping.institutions WHERE institution_code = ?", newUserRequest.Institution_code).Scan(&institutionDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if institutionDetails.Institution_id == 0 {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "404", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Not Found", nil, nil)
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "404", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	// register the user
-	if insertErr := database.DBConn.Raw("SELECT public.update_user_info(?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, newUserRequest.Phone_no, newUserRequest.Staff_id, institutionDetails.Institution_id, userIdToBeUpdated).Scan(&remark).Error; insertErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, nil)
+	if insertErr := database.DBConn.Raw("SELECT public.update_user_info(?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, isPhoneNoFormatted.Data.Message, newUserRequest.Staff_id, institutionDetails.Institution_id, userIdToBeUpdated).Scan(&remark).Error; insertErr != nil {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "304", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -159,7 +246,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 
 	// get user details
 	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ?", newUserRequest.Staff_id, newUserRequest.Username).Scan(&updatedUserDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -174,7 +261,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		}
 	}
 
-	successResp := middleware.ResponseData(UserDetails.Username, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "204", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Updated User Details", nil, updatedUserDetails)
+	successResp := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "204", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Updated User Details", nil, updatedUserDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
