@@ -201,7 +201,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// validate if email address already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE email AND user_id != ?", newUserRequest.Email, newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE email AND user_id != ?", newUserRequest.Email, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
