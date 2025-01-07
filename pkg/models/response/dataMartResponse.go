@@ -41,13 +41,11 @@ type (
 	}
 
 	MemberSavingDetails struct {
-		Cid           string `json:"cid"`
-		First_name    string `json:"first_name"`
-		Last_name     string `json:"last_name"`
-		Date_of_birth string `json:"date_of_birth"`
-		Phone_1       string `json:"phone_1"`
-		Phone_2       string `json:"phone_2"`
-		Center_code   string `json:"center_code"`
-		Insti_code    string `json:"insti_code"`
+		Account_number   string `json:"account_number"`
+		Account_title    string `json:"account_title"`
+		Account_status   string `json:"account_status"`
+		Account_category string `json:"account_category"`
+		Cid              string `json:"cid"`
+		Insti_code       string `json:"insti_code"`
 	}
 )
