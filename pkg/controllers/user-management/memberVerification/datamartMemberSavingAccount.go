@@ -14,7 +14,7 @@ import (
 )
 
 func GetMemberSavingAcountDetailsFromDataMart(cid, instiCode, fullName, appCode, moduleName, methodUsed, endpoint, apiKey string) (response.ReturnModel, response.MemberResponse) {
-	dmUserSavings := response.MemberResponse{}
+	dmUserSavings := response.MemberSavingResponse{}
 
 	funcName := "Get Member Saving Account Details From Data Mart"
 
