@@ -13,7 +13,7 @@ import (
 	"soteria_go/pkg/models/response"
 )
 
-func GetMemberSavingAcountDetailsFromDataMart(cid, instiCode, fullName, appCode, moduleName, methodUsed, endpoint, apiKey string) (response.ReturnModel, response.MemberResponse) {
+func GetMemberSavingAcountDetailsFromDataMart(cid, instiCode, fullName, appCode, moduleName, methodUsed, endpoint, apiKey string) (response.ReturnModel, response.MemberSavingResponse) {
 	dmUserSavings := response.MemberSavingResponse{}
 
 	funcName := "Get Member Saving Account Details From Data Mart"
