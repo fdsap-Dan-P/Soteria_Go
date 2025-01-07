@@ -24,7 +24,7 @@ type (
 	}
 
 	MemberVerificationRequest struct {
-		First_name       string `json:"first_ame,omitempty"`
+		First_name       string `json:"first_name,omitempty"`
 		Last_name        string `json:"last_name,omitempty"`
 		Birthdate        string `json:"birthdate,omitempty"`
 		Phone_no         string `json:"phone_no,omitempty"`
