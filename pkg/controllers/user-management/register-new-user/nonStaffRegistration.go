@@ -161,21 +161,25 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 		Birthdate:  isBdateFormatted.Data.Message,
 	}
 
-	// get the CID and institution
-	memberVerifyStatus, memberVerifyDetails := memberVerification.VerifyMemberFromDataMart(newUserRequest.Username, appDetails.Application_code, moduleName, methodUsed, endpoint, apiKey, dmMemberVerifyReqBody)
-	if !memberVerifyStatus.Data.IsSuccess {
-		return c.JSON(memberVerifyStatus)
-	}
-
 	// generate user's temp password
 	tempPassword := middleware.PasswordGeneration()
 	hashTempPassword := hash.SHA256(tempPassword)
 
-	// identify if user member or not
-	//----- CODE HERE -----//
+	if strings.TrimSpace(newUserRequest.Institution_code) == "" {
+		// get the CID and institution
+		memberVerifyStatus, memberVerifyDetails := memberVerification.VerifyMemberFromDataMart(newUserRequest.Username, appDetails.Application_code, moduleName, methodUsed, endpoint, apiKey, dmMemberVerifyReqBody)
+		if !memberVerifyStatus.Data.IsSuccess {
+			return c.JSON(memberVerifyStatus)
+		}
 
-	if strings.TrimSpace(memberVerifyDetails.Data.Details.Insti_code) == "" {
-		userInstiCode = "0000"
+		// identify if user member or not
+		//----- CODE HERE -----//
+
+		if strings.TrimSpace(memberVerifyDetails.Data.Details.Insti_code) == "" {
+			userInstiCode = "0000"
+		}
+	} else {
+		userInstiCode = newUserRequest.Institution_code
 	}
 
 	// register the user
