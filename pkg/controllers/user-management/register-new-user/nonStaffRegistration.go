@@ -184,7 +184,14 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 
 	// register the user
 	if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, isPhoneNoFormatted.Data.Message, "", userInstiCode, hashTempPassword, true, "").Scan(&remark).Error; insertErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Username, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
+		returnMessage := middleware.ResponseData(newUserRequest.Username, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if remark.Remark != "Success" {
+		returnMessage := middleware.ResponseData(newUserRequest.Username, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fmt.Errorf("%s", remark.Remark), nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -193,6 +200,13 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 	// get user details
 	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ?", newUserRequest.Username).Scan(&userDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if userDetails.User_id == 0 {
+		returnMessage := middleware.ResponseData(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, newUserRequestByte, []byte(""), "User Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
