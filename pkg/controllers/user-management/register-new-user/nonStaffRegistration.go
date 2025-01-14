@@ -20,6 +20,7 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 	newUserRequest := request.UserRegistrationRequest{}
 	userDetailValidation := response.UserDetails{}
 	userDetails := response.UserDetails{}
+	instiDetails := response.InstitutionDetails{}
 	remark := response.DBFuncResponse{}
 
 	methodUsed := c.Method()
@@ -182,8 +183,23 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 		userInstiCode = newUserRequest.Institution_code
 	}
 
+	// get the institution details
+	if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_code = ?", userInstiCode).Scan(&instiDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData("", "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if instiDetails.Institution_id == 0 {
+		returnMessage := middleware.ResponseData("", "", appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, newUserRequestByte, []byte(""), "Institution Not Found", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
 	// register the user
-	if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, isPhoneNoFormatted.Data.Message, "", userInstiCode, hashTempPassword, true, "").Scan(&remark).Error; insertErr != nil {
+	if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, isPhoneNoFormatted.Data.Message, "", instiDetails.Institution_id, hashTempPassword, true, "").Scan(&remark).Error; insertErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Username, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)

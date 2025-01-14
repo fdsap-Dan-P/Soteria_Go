@@ -53,7 +53,7 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 	}
 
 	fmt.Println("")
-	fmt.Printf("SOTERIA-GO | %s | %s | Error: %+v | %s", returnMessage.RetCode, returnMessage.Data.Message, returnMessage.Data.Error, funcName)
+	fmt.Printf("CAGABAY UA | %s | %s | Error: %+v | %s | %s |", returnMessage.RetCode, returnMessage.Data.Message, returnMessage.Data.Error, funcName, endpoint)
 
 	ActivityLogger(username, instiCode, appCode, moduleName, funcName, retcode, method, endpoint, []byte(reqBody), []byte(""), returnMessage.Message, returnMessage.Data.Message, error_message)
 	return returnMessage
