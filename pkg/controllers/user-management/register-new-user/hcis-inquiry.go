@@ -28,9 +28,15 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 		}
 	}
 
-	// Basic auth credentials
-	hcis_username := "unifiedauth"
-	hcis_password := "P@ssword123"
+	// Basic auth credentials [UAT]
+	// url := "https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo"
+	// hcis_username := "unifiedauth"
+	// hcis_password := "P@ssword123"
+
+	// Basic auth credentials [PROD]
+	url := "https://ua.cardmri.com:9125/HCISLink/WEBAPI/ExternalService/ViewStaffInfo"
+	hcis_username := "cagabayfdsap"
+	hcis_password := "ap!2024fdsap"
 	hcis_authHeader := "Basic " + base64.StdEncoding.EncodeToString([]byte(hcis_username+":"+hcis_password))
 
 	hcis_reqBody := map[string]string{"StaffID": staffId}
@@ -59,7 +65,7 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	client := &http.Client{Transport: tr}
 
 	// Create the HTTP request and set headers
-	req, reqErr := http.NewRequest("POST", "https://ua-uat.cardmri.com:8555/HCISLink/WEBAPI/ExternalService/ViewStaffInfo", bytes.NewBuffer(hcis_reqBodyByte))
+	req, reqErr := http.NewRequest("POST", url, bytes.NewBuffer(hcis_reqBodyByte))
 	if reqErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "405", methodUsed, endpoint, hcis_reqBodyByte, []byte(""), "", reqErr, userHCISDetails)
 		if !returnMessage.Data.IsSuccess {
