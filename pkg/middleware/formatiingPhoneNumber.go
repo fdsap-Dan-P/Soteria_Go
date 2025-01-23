@@ -20,7 +20,7 @@ func NormalizePhoneNumber(phonenumber, username, instiCode, appCode, funcName, m
 		normalizedPhonenumber = phonenumber
 	} else if phonenumber[0:1] == "6" && len(phonenumber) == 12 {
 		normalizedPhonenumber = "0" + phonenumber[2:12]
-	} else if phonenumber[0:1] == "+" || phonenumber[0:1] == " " {
+	} else if phonenumber[0:3] == "+63" || phonenumber[0:3] == " 63" {
 		normalizedPhonenumber = "0" + phonenumber[3:13]
 	} else if phonenumber[0:1] == "9" {
 		normalizedPhonenumber = "0" + phonenumber

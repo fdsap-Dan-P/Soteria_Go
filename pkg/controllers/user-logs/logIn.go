@@ -113,7 +113,7 @@ func Login(c *fiber.Ctx) error {
 	fmt.Println("INSTI CODE: ", userDetails.Institution_code)
 
 	// generate the jwt token
-	token, tokenErr := middleware.GenerateToken(userDetails.Username, instiDetails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint)
+	token, tokenErr := middleware.GenerateToken(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint)
 	fmt.Print("token: ", token)
 	fmt.Println("tokenErr: ", tokenErr)
 	if tokenErr != nil {
