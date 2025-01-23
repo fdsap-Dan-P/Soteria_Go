@@ -18,7 +18,6 @@ func Login(c *fiber.Ctx) error {
 	credentialRequest := request.LoginCredentialsRequest{}
 	userDetails := response.UserDetails{}
 	userPasswordDetails := response.UserPasswordDetails{}
-	instiDetails := response.InstitutionDetails{}
 
 	methodUsed := c.Method()
 	endpoint := c.Path()
@@ -61,7 +60,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// check if staff_id has value
-	if strings.TrimSpace(credentialRequest.User_identity) == "" {
+	if strings.TrimSpace(credentialRequest.Password) == "" {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Password Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -92,7 +91,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	if userPasswordDetails.User_id == 0 {
-		returnMessage := middleware.ResponseData(credentialRequest.User_identity, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Not Found", nil, nil)
+		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -100,7 +99,7 @@ func Login(c *fiber.Ctx) error {
 
 	hashPasswordRequest := hash.SHA256(credentialRequest.Password)
 	if userPasswordDetails.User_id == 0 || userPasswordDetails.Password_hash != hashPasswordRequest {
-		returnMessage := middleware.ResponseData(credentialRequest.User_identity, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "103", methodUsed, endpoint, credentialRequestByte, []byte(""), "Invalid Credential", nil, userDetails)
+		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "103", methodUsed, endpoint, credentialRequestByte, []byte(""), "Invalid Credential", nil, userDetails)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -124,7 +123,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// create or recrete the user token
-	isTokenStored := middleware.StoringUserToken(token, userDetails.Username, userDetails.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint, credentialRequestByte)
+	isTokenStored := middleware.StoringUserToken(token, userDetails.Username, userDetails.Staff_id, userDetails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint, credentialRequestByte)
 	if !isTokenStored.Data.IsSuccess {
 		return c.JSON(isTokenStored)
 	}
@@ -134,7 +133,7 @@ func Login(c *fiber.Ctx) error {
 	// marshal the user details
 	userDetailsByte, marshalErr := json.Marshal(userDetails)
 	if marshalErr != nil {
-		returnMessage := middleware.ResponseData(credentialRequest.User_identity, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, credentialRequestByte, []byte(""), "Marshalling Response Body Failed", marshalErr, marshalErr.Error())
+		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, credentialRequestByte, []byte(""), "Marshalling Response Body Failed", marshalErr, marshalErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -142,7 +141,7 @@ func Login(c *fiber.Ctx) error {
 
 	fmt.Println("userDetailsByte: ", string(userDetailsByte))
 
-	returnMessage := middleware.ResponseData(credentialRequest.User_identity, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "201", methodUsed, endpoint, credentialRequestByte, userDetailsByte, "", nil, userDetails)
+	returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "201", methodUsed, endpoint, credentialRequestByte, userDetailsByte, "", nil, userDetails)
 	if !returnMessage.Data.IsSuccess {
 		return c.JSON(returnMessage)
 	}
