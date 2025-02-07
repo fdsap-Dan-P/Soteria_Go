@@ -8,10 +8,10 @@ type (
 	}
 
 	MemberData struct {
-		Message   string        `json:"message"`
-		IsSuccess bool          `json:"isSuccess"`
-		Error     error         `json:"error,omitempty"`
-		Details   MemberDetails `json:"details,omitempty"`
+		Message   string `json:"message"`
+		IsSuccess bool   `json:"isSuccess"`
+		// Error     error         `json:"error,omitempty"`
+		Details MemberDetails `json:"details,omitempty"`
 	}
 
 	MemberDetails struct {
