@@ -22,6 +22,13 @@ type (
 		Phone_1       string `json:"phone_1"`
 		Phone_2       string `json:"phone_2"`
 		Center_code   string `json:"center_code"`
+		Center_name   string `json:"center_name"`
+		Unit_code     string `json:"unit_code"`
+		Unit_name     string `json:"unit_name"`
+		Branch_code   string `json:"branch_code"`
+		Branch_name   string `json:"branch_name"`
+		Ao_name       string `json:"ao_name"`
+		Ao_staff_id   string `json:"ao_staff_id"`
 		Insti_code    string `json:"insti_code"`
 	}
 )
