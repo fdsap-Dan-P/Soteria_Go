@@ -68,7 +68,7 @@ type UserApplicationDetails struct {
 	Staff_id                string `json:"staff_id"`
 	Email                   string `json:"email"`
 	Phone_no                string `json:"phone_no"`
-	Application_code        string `json:"app_code"`
+	Application_code        string `json:"application_code"`
 	Application_name        string `json:"application_name"`
 	Application_description string `json:"application_description"`
 	Institution_code        string `json:"institution_code"`
