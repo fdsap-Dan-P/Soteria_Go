@@ -3,10 +3,12 @@ package securitymanagement
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/request"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
+	"soteria_go/pkg/utils/go-utils/encryptDecrypt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -66,7 +68,16 @@ func AppRegistration(c *fiber.Ctx) error {
 	// generate the app code
 	appCode, genErr := middleware.AppCodeGeneration(newAppRequest.App_name)
 	if genErr != nil {
-		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "302", methodUsed, endpoint, newAppRequestByte, []byte(""), "", genErr, genErr.Error())
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "302", methodUsed, endpoint, newAppRequestByte, []byte(""), "", genErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// get the secret key
+	secretKey := os.Getenv("SECRET_KEY")
+	if strings.TrimSpace(secretKey) == "" {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "404", methodUsed, endpoint, newAppRequestByte, []byte(""), "Secret Key Not Found in Environment", genErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -74,9 +85,16 @@ func AppRegistration(c *fiber.Ctx) error {
 
 	// generate the api key
 	apiKey := uuid.New().String()
+	encryptedApiKey, encryptErr := encryptDecrypt.EncryptWithSecretKey(apiKey, secretKey)
+	if encryptErr != nil {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "318", methodUsed, endpoint, newAppRequestByte, []byte(""), "Encrypting API Key Failed", encryptErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
 
 	// insert the app details
-	if insErr := database.DBConn.Raw("INSERT INTO public.applications(application_code, application_name, application_description, api_key) VALUES (?, ?, ?, ?) RETURNING *", appCode, newAppRequest.App_name, newAppRequest.App_desc, apiKey).Scan(&appDetails).Error; insErr != nil {
+	if insErr := database.DBConn.Raw("INSERT INTO public.applications(application_code, application_name, application_description, api_key) VALUES (?, ?, ?, ?) RETURNING *", appCode, newAppRequest.App_name, newAppRequest.App_desc, encryptedApiKey).Scan(&appDetails).Error; insErr != nil {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "303", methodUsed, endpoint, newAppRequestByte, []byte(""), "", genErr, genErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -85,6 +103,7 @@ func AppRegistration(c *fiber.Ctx) error {
 
 	// remove app id as return
 	appDetails.Application_id = 0
+	appDetails.Api_key = apiKey // return the plain api key
 
 	// marshal the response
 	appDetailsByte, marshalErr := json.Marshal(appDetails)
