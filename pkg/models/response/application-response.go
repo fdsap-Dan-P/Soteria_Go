@@ -10,4 +10,11 @@ type (
 		Created_at              string `json:"created_at"`
 		Updated_at              string `json:"updated_at"`
 	}
+
+	UserAppResponse struct {
+		User_id        int    `json:"user_id"`
+		Application_id int    `json:"application_id"`
+		Created_at     string `json:"created_at"`
+		Updated_at     string `json:"updated_at"`
+	}
 )
