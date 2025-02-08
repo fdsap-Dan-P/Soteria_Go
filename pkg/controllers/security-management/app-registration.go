@@ -17,12 +17,66 @@ import (
 
 func AppRegistration(c *fiber.Ctx) error {
 	newAppRequest := request.ApplicationRequest{}
+	userApiKeyDetails := response.ApplicationDetails{}
 	appDetails := response.ApplicationDetails{}
 
 	moduleName := "Security Management"
 	funcName := "Application Registration"
 	methodUsed := c.Method()
 	endpoint := c.Path()
+
+	// Extract the api key from Authorization header
+	userApiKey := c.Get("X-API-Key")
+
+	// validate if the api key is provided
+	if strings.TrimSpace(userApiKey) == "" {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "401", methodUsed, endpoint, []byte(""), []byte(""), "User API Key Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// get the secret key
+	secretKey := os.Getenv("SECRET_KEY")
+	if strings.TrimSpace(secretKey) == "" {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "Secret Key Not Found in Environment", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// encrypt the user api key
+	userEncryptedApiKey, userEncryptErr := encryptDecrypt.EncryptWithSecretKey(userApiKey, secretKey)
+	if userEncryptErr != nil {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "318", methodUsed, endpoint, []byte(""), []byte(""), "Encrypting User API Key Failed", userEncryptErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// get the user api key details
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.applications WHERE api_key = ?", userEncryptedApiKey).Scan(&userApiKeyDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// validate the user api key exists
+	if userApiKeyDetails.Application_id == 0 {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "User API Key Not Found", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// validate if the user is an admin
+	if userApiKeyDetails.Application_code != "CU0003-1738988675" {
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "402", methodUsed, endpoint, []byte(""), []byte(""), "Unauthorized Access", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
 
 	if parsErr := c.BodyParser(&newAppRequest); parsErr != nil {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
@@ -69,15 +123,6 @@ func AppRegistration(c *fiber.Ctx) error {
 	appCode, genErr := middleware.AppCodeGeneration(newAppRequest.App_name)
 	if genErr != nil {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "302", methodUsed, endpoint, newAppRequestByte, []byte(""), "", genErr, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	// get the secret key
-	secretKey := os.Getenv("SECRET_KEY")
-	if strings.TrimSpace(secretKey) == "" {
-		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "404", methodUsed, endpoint, newAppRequestByte, []byte(""), "Secret Key Not Found in Environment", genErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
