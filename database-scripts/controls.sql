@@ -8,7 +8,7 @@ GRANT all privileges on database cagabay_ua_prod TO cagabay_ua_user;
 
 GRANT usage on schema public TO cagabay_ua_user;
 GRANT usage on schema parameters TO cagabay_ua_user;
-GRANT usage on schema logs TO cagabay_ua_user;x
+GRANT usage on schema logs TO cagabay_ua_user;
 GRANT usage on schema offices_mapping TO cagabay_ua_user;
 
 GRANT all privileges on all tables in schema public TO cagabay_ua_user;
