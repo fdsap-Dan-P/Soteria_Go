@@ -3,16 +3,18 @@ package validations
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
+	"soteria_go/pkg/utils/go-utils/encryptDecrypt"
 	"strings"
 )
 
 func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUsed, endpoint string, reqBody []byte) (response.ReturnModel, response.ApplicationDetails) {
+	appDetails := response.ApplicationDetails{}
 	funcName := "Validate API Key"
 
-	appDetails := response.ApplicationDetails{}
 	// check if api key has value
 	if strings.TrimSpace(apiKey) == "" {
 		fmt.Println("API KEY: ", apiKey)
@@ -22,8 +24,26 @@ func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUs
 		}
 	}
 
+	// get the secret key
+	secretKey := os.Getenv("SECRET_KEY")
+	if strings.TrimSpace(secretKey) == "" {
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "404", methodUsed, endpoint, reqBody, []byte(""), "Secret Key Not Found in Environment", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return returnMessage, response.ApplicationDetails{}
+		}
+	}
+
+	// encrypt the given api key
+	encryptedApiKey, encryptErr := encryptDecrypt.EncryptWithSecretKey(apiKey, secretKey)
+	if encryptErr != nil {
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "318", methodUsed, endpoint, reqBody, []byte(""), "Encrypting API Key Failed", encryptErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return returnMessage, response.ApplicationDetails{}
+		}
+	}
+
 	// check from the database if exist
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.applications WHERE api_key = ?", apiKey).Scan(&appDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.applications WHERE api_key = ?", encryptedApiKey).Scan(&appDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, appDetails
