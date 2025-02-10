@@ -17,10 +17,12 @@ type (
 	MemberDetails struct {
 		Cid           string `json:"cid"`
 		First_name    string `json:"first_name"`
+		Middle_name   string `json:"middle_name"`
 		Last_name     string `json:"last_name"`
 		Date_of_birth string `json:"date_of_birth"`
 		Phone_1       string `json:"phone_1"`
 		Phone_2       string `json:"phone_2"`
+		Email         string `json:"email"`
 		Center_code   string `json:"center_code"`
 		Center_name   string `json:"center_name"`
 		Unit_code     string `json:"unit_code"`
