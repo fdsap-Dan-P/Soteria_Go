@@ -52,6 +52,7 @@ func SetupPublicRoutes(app *fiber.App) {
 	secManagement.Get("/validate-header", securitymanagement.ThirdPartyHeaderValidation)
 	secManagement.Post("/register-application", securitymanagement.AppRegistration) // admin only
 	secManagement.Post("/retrieve-api-key", securitymanagement.RetrievePlainApiKey) // admin only
+	secManagement.Post("/encrypt-api-key", securitymanagement.RetrievePlainApiKey)
 	secManagement.Post("/change-password/:username", setuserpassword.UserInitiatedPasswordChange)
 	secManagement.Post("/expire-password/:username", setuserpassword.UserChangePasswordAfterExpired)
 	secManagement.Get("/reset-password/:username", setuserpassword.ResetUserPasswordToTemporary)
