@@ -90,7 +90,7 @@ func ActivityLogger(user string, instiCode, appCode, moduleName, funcName, retCo
 	} else if retCodeInt >= 300 && retCodeInt < 400 {
 		level = "ERROR"
 		logrus.Error("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-		logrus.Error(retCode, " |   ", endpoint, "     |     ", responsErr.Error())
+		logrus.Error(retCode, " |   ", endpoint, "     |     ", responsErr)
 		logrus.Error("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 	} else {
 		level = "WARN"
