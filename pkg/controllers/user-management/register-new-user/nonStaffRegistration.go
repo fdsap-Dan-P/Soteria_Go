@@ -227,18 +227,51 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 
 	fmt.Println("APP ID: ", appDetails.Application_id)
 
-	if userDetailValidation.User_id != 0 {
-		fmt.Println("TRACE 2")
-		fmt.Println("userDetails.User_id: ", userDetails.User_id)
-		// validate where application did the user is linked
-		if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_app_view WHERE username = ?", newUserRequest.Username).Scan(&userAppDetails).Error; fetchErr != nil {
-			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
+	fmt.Println("TRACE 2")
+	fmt.Println("userDetails.User_id: ", userDetails.User_id)
+	// validate where application did the user is linked
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_app_view WHERE username = ?", newUserRequest.Username).Scan(&userAppDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if len(userAppDetails) == 0 { // if the user is not linked to any application
+		// link the user to this application
+		if insErr := database.DBConn.Raw("INSERT INTO public.user_applications (user_id, application_id) VALUES (?, ?)", userDetails.User_id, appDetails.Application_id).Scan(&userAppResp).Error; insErr != nil {
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insErr, nil)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
 			}
 		}
 
-		if len(userAppDetails) == 0 { // if the user is not linked to any application
+		userDetails.Password = "Use Current Password in Linked Application"
+
+		// marshal the response body
+		UserDetailsByte, marshalErr := json.Marshal(userDetails)
+		if marshalErr != nil {
+			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, newUserRequestByte, []byte(""), "", marshalErr, marshalErr.Error())
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
+		}
+
+		successResp := middleware.ResponseData(userDetails.Username, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, userDetails)
+		return c.JSON(successResp)
+
+	} else { // check if the user is already linked to any application
+		fmt.Println("TRACE 3")
+		fmt.Println("LEN: ", len(userAppDetails))
+		isUserLinked := false
+		for _, userLinkedApp := range userAppDetails { // check if the user is already linked to this application
+			if userLinkedApp.Application_code == appDetails.Application_code {
+				isUserLinked = true
+			}
+		}
+
+		if !isUserLinked { // if the user is not linked to this application
+			fmt.Println("TRACE 4")
 			// link the user to this application
 			if insErr := database.DBConn.Raw("INSERT INTO public.user_applications (user_id, application_id) VALUES (?, ?)", userDetails.User_id, appDetails.Application_id).Scan(&userAppResp).Error; insErr != nil {
 				returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insErr, nil)
@@ -260,46 +293,11 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 
 			successResp := middleware.ResponseData(userDetails.Username, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, userDetails)
 			return c.JSON(successResp)
-
-		} else { // check if the user is already linked to any application
-			fmt.Println("TRACE 3")
-			fmt.Println("LEN: ", len(userAppDetails))
-			isUserLinked := false
-			for _, userLinkedApp := range userAppDetails { // check if the user is already linked to this application
-				if userLinkedApp.Application_code == appDetails.Application_code {
-					isUserLinked = true
-				}
-			}
-
-			if !isUserLinked { // if the user is not linked to this application
-				fmt.Println("TRACE 4")
-				// link the user to this application
-				if insErr := database.DBConn.Raw("INSERT INTO public.user_applications (user_id, application_id) VALUES (?, ?)", userDetails.User_id, appDetails.Application_id).Scan(&userAppResp).Error; insErr != nil {
-					returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insErr, nil)
-					if !returnMessage.Data.IsSuccess {
-						return c.JSON(returnMessage)
-					}
-				}
-
-				userDetails.Password = "Use Current Password in Linked Application"
-
-				// marshal the response body
-				UserDetailsByte, marshalErr := json.Marshal(userDetails)
-				if marshalErr != nil {
-					returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, newUserRequestByte, []byte(""), "", marshalErr, marshalErr.Error())
-					if !returnMessage.Data.IsSuccess {
-						return c.JSON(returnMessage)
-					}
-				}
-
-				successResp := middleware.ResponseData(userDetails.Username, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, newUserRequestByte, UserDetailsByte, "Successfully Registered User", nil, userDetails)
-				return c.JSON(successResp)
-			} else { // if the user is already linked to this application
-				fmt.Println("TRACE 5")
-				returnMessage := middleware.ResponseData(newUserRequest.Username, "", appDetails.Application_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Username Already Exists", nil, nil)
-				if !returnMessage.Data.IsSuccess {
-					return c.JSON(returnMessage)
-				}
+		} else { // if the user is already linked to this application
+			fmt.Println("TRACE 5")
+			returnMessage := middleware.ResponseData(newUserRequest.Username, "", appDetails.Application_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Username Already Exists", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
 			}
 		}
 	}
