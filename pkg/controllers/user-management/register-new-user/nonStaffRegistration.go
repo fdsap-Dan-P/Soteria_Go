@@ -225,7 +225,7 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 
 	if userDetailValidation.User_id != 0 {
 		// validate where application did the user is linked
-		if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_app_view WHERE staff_id = ?", newUserRequest.Staff_id).Scan(&userAppDetails).Error; fetchErr != nil {
+		if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_app_view WHERE username = ?", newUserRequest.Username).Scan(&userAppDetails).Error; fetchErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
