@@ -224,16 +224,16 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 	}
 
 	if userDetails.User_id == 0 {
-		// link the user to this application
-		isUserLinked := LinkingUserToApp(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, methodUsed, endpoint, userDetails.User_id, appDetails.Application_id, newUserRequestByte)
-		if !isUserLinked.Data.IsSuccess {
-			return c.JSON(isUserLinked)
-		}
-
 		returnMessage := middleware.ResponseData(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, newUserRequestByte, []byte(""), "User Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
+	}
+
+	// link the user to this application
+	isUserLinked := LinkingUserToApp(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, methodUsed, endpoint, userDetails.User_id, appDetails.Application_id, newUserRequestByte)
+	if !isUserLinked.Data.IsSuccess {
+		return c.JSON(isUserLinked)
 	}
 
 	// append the temp password to the user's details
