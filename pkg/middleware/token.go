@@ -137,15 +137,16 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 		}
 	}
 
-	if fetchErr := database.DBConn.Raw("SELECT * FROM logs.user_tokens WHERE (username = ? OR staff_id = ?) AND insti_code = ? AND app_code = ?", username, staffId, instiCode, appCode).Scan(&userTokenDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM logs.user_tokens WHERE (username = ? OR staff_id = ?) AND insti_code = ? AND app_code = ?", username, username, instiCode, appCode).Scan(&userTokenDetails).Error; fetchErr != nil {
 		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, reqBody, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
 	}
 
+	fmt.Println("Token id: ", userTokenDetails.Token_id)
 	if userTokenDetails.Token_id == 0 {
-		if insErr := database.DBConn.Raw("SELECT logs.create_user_token(?, ?, ?, ?, ?) AS remark", username, staffId, tokenString, instiCode, appCode).Scan(&remark).Error; insErr != nil {
+		if insErr := database.DBConn.Debug().Raw("SELECT logs.create_user_token(?, ?, ?, ?, ?) AS remark", username, staffId, tokenString, instiCode, appCode).Scan(&remark).Error; insErr != nil {
 			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", insErr, insErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
@@ -159,7 +160,7 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 			}
 		}
 	} else {
-		if updErr := database.DBConn.Raw("SELECT logs.update_user_token(?, ?, ?, ?, ?) AS remark", username, staffId, tokenString, instiCode, appCode).Scan(&remark).Error; updErr != nil {
+		if updErr := database.DBConn.Debug().Raw("SELECT logs.update_user_token(?, ?, ?, ?, ?) AS remark", username, staffId, tokenString, instiCode, appCode).Scan(&remark).Error; updErr != nil {
 			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "304", methodUsed, endpoint, reqBody, []byte(""), "", updErr, updErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
