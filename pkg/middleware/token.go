@@ -159,7 +159,7 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 			}
 		}
 	} else {
-		if updErr := database.DBConn.Raw("SELECT logs.update_user_token(?, ?, ?, ?, ?) AS remark", tokenString, username, staffId, staffId, appCode).Scan(&remark).Error; updErr != nil {
+		if updErr := database.DBConn.Raw("SELECT logs.update_user_token(?, ?, ?, ?, ?) AS remark", username, staffId, tokenString, instiCode, appCode).Scan(&remark).Error; updErr != nil {
 			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "304", methodUsed, endpoint, reqBody, []byte(""), "", updErr, updErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return (returnMessage)
