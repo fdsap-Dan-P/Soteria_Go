@@ -103,11 +103,13 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 	}
 
 	// validate email address
-	isEmailAddrValid := middleware.ValidateEmail(newUserRequest.Email)
-	if !isEmailAddrValid {
-		returnMessage := middleware.ResponseData(newUserRequest.Username, "", appDetails.Application_code, moduleName, funcName, "109", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
+	if strings.TrimSpace(newUserRequest.Email) != "" { // some project don't require email
+		isEmailAddrValid := middleware.ValidateEmail(newUserRequest.Email)
+		if !isEmailAddrValid {
+			returnMessage := middleware.ResponseData(newUserRequest.Username, "", appDetails.Application_code, moduleName, funcName, "109", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
 		}
 	}
 
@@ -142,18 +144,20 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 		}
 	}
 
-	// validate if email address already exist
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE email = ?", newUserRequest.Email).Scan(&userDetailValidation).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
+	if strings.TrimSpace(newUserRequest.Email) != "" {
+		// validate if email address already exist
+		if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE email = ?", newUserRequest.Email).Scan(&userDetailValidation).Error; fetchErr != nil {
+			returnMessage := middleware.ResponseData(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
 		}
-	}
 
-	if userDetailValidation.User_id != 0 {
-		returnMessage := middleware.ResponseData(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Email Address Already Exists", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
+		if userDetailValidation.User_id != 0 {
+			returnMessage := middleware.ResponseData(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Email Address Already Exists", nil, nil)
+			if !returnMessage.Data.IsSuccess {
+				return c.JSON(returnMessage)
+			}
 		}
 	}
 
