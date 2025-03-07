@@ -194,7 +194,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 		fmt.Println("CONDITION 3")
 		fmt.Println("RETCODE: ", hcisResponseStatus.RetCode)
 		// register the user
-		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, hcisResponseDeatails.Staff_id, hcisResponseDeatails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message, instiDetails.Institution_code, appDetails.Application_code).Scan(&remark).Error; insertErr != nil {
+		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, hcisResponseDeatails.Staff_id, hcisResponseDeatails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message, hcisResponseDeatails.Institution_code, appDetails.Application_code).Scan(&remark).Error; insertErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
