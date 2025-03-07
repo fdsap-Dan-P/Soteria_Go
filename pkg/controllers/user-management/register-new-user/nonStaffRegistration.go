@@ -205,7 +205,7 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 	}
 
 	// register the user
-	if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, isPhoneNoFormatted.Data.Message, "", instiDetails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message).Scan(&remark).Error; insertErr != nil {
+	if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, isPhoneNoFormatted.Data.Message, "", instiDetails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message, instiDetails.Institution_code, appDetails.Application_code).Scan(&remark).Error; insertErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Username, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)

@@ -29,7 +29,7 @@ func ChangePasswordValidation(password, username, instiCode, appCode, moduleName
 	newHashedPassword := hash.SHA256(password)
 
 	// update the user's password
-	if updatErr := database.DBConn.Raw("SELECT public.add_user_passwords(?, ?, ?, ?) AS remark", userId, newHashedPassword, false, currentDateTime).Scan(&remark).Error; updatErr != nil {
+	if updatErr := database.DBConn.Raw("SELECT public.add_user_passwords(?, ?, ?, ?, ?, ?) AS remark", userId, newHashedPassword, false, currentDateTime, instiCode, appCode).Scan(&remark).Error; updatErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, []byte(""), []byte(""), "", updatErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)

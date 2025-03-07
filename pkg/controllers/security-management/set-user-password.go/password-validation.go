@@ -149,7 +149,7 @@ func PasswordReuseValidation(password string, instiCode string, appCode string, 
 	}
 
 	// get the last password used
-	if fetchErr := database.DBConn.Raw("SELECT * FROM password_reuse(?, ?)", userId, minPassReuseInt).Scan(&prevPasswords).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM password_reuse(?, ?, ?, ?)", userId, minPassReuseInt, instiCode, appCode).Scan(&prevPasswords).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)

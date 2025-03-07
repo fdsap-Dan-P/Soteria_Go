@@ -18,7 +18,7 @@ func SetTempPassword(userId int, username, instiCode, appCode, moduleName, metho
 	hashTempPassword := hash.SHA256(tempPassword)
 
 	// register the user
-	if insertErr := database.DBConn.Raw("SELECT public.add_user_passwords(?, ?, ?, ?) AS remark", userId, hashTempPassword, true, "").Scan(&remark).Error; insertErr != nil {
+	if insertErr := database.DBConn.Raw("SELECT public.add_user_passwords(?, ?, ?, ?, ?, ?) AS remark", userId, hashTempPassword, true, "", instiCode, appCode).Scan(&remark).Error; insertErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, []byte(""), []byte(""), "", insertErr, insertErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)

@@ -99,7 +99,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// check if password is valid
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_passwords WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", userDetails.User_id).Scan(&userPasswordDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_passwords WHERE user_id = ? AND insti_code = ? AND app_code = ? ORDER BY created_at DESC LIMIT 1", userDetails.User_id, userDetails.Institution_code, appDetails.Application_code).Scan(&userPasswordDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, credentialRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
