@@ -29,7 +29,7 @@ func RetrievePlainApiKey(c *fiber.Ctx) error {
 	}
 
 	// validate if user is admin
-	if appCode == "CU0003-1738988675" {
+	if appCode == "CU0003-1738988675" { // 1189289a-e743-46ee-87b0-53d2a08386b6
 		// Extract the api key from Authorization header
 		userApiKey := c.Get("X-API-Key")
 

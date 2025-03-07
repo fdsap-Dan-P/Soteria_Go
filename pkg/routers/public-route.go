@@ -50,8 +50,8 @@ func SetupPublicRoutes(app *fiber.App) {
 	//--- S E C U R I T Y    M A N A G E M E N T ---//
 	secManagement := auth.Group("/security-management")
 	secManagement.Get("/validate-header", securitymanagement.ThirdPartyHeaderValidation)
-	secManagement.Post("/register-application", securitymanagement.AppRegistration) // admin only
-	secManagement.Post("/retrieve-api-key", securitymanagement.RetrievePlainApiKey) // admin only
+	secManagement.Post("/register-application", securitymanagement.AppRegistration)           // admin only
+	secManagement.Post("/retrieve-api-key/:app-code", securitymanagement.RetrievePlainApiKey) // admin only
 	secManagement.Get("/encrypt-api-key", securitymanagement.EncryptApiKey)
 	secManagement.Post("/change-password/:username", setuserpassword.UserInitiatedPasswordChange)
 	secManagement.Post("/expire-password/:username", setuserpassword.UserChangePasswordAfterExpired)

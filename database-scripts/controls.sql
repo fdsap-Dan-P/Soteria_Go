@@ -20,3 +20,5 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO cagabay_ua_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA parameters TO cagabay_ua_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA logs TO cagabay_ua_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA offices_mapping TO cagabay_ua_user;
+
+admin_api_key = 1189289a-e743-46ee-87b0-53d2a08386b6
