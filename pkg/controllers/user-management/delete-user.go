@@ -5,6 +5,7 @@ import (
 	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,6 +26,13 @@ func DeleteUser(c *fiber.Ctx) error {
 	validationStatus, validationDetails := validations.HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endpoint)
 	if !validationStatus.Data.IsSuccess {
 		return c.JSON(validationStatus)
+	}
+
+	if strings.TrimSpace(userIdentity) == "" {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.App_code, validationDetails.Insti_code, moduleName, funcName, "401", methodUsed, endpoint, []byte(""), []byte(""), "User Identity Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
 	}
 
 	if fetchErr := database.DBConn.Raw("SELECT * FROM user_details WHERE username = ? OR staff_id = ?", userIdentity, userIdentity).Scan(&userDetails).Error; fetchErr != nil {
