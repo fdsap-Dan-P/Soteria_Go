@@ -11,7 +11,8 @@ type (
 		Message   string `json:"message"`
 		IsSuccess bool   `json:"isSuccess"`
 		// Error     error         `json:"error,omitempty"`
-		Details MemberDetails `json:"details,omitempty"`
+		No_phone_number_user int           `json:"no_phone_number_user"`
+		Details              MemberDetails `json:"details,omitempty"`
 	}
 
 	MemberDetails struct {

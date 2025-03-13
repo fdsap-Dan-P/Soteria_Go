@@ -94,6 +94,7 @@ func MemberVerification(c *fiber.Ctx) error {
 	userVerification.First_name = userRequest.First_name
 	userVerification.Last_name = userRequest.Last_name
 	userVerification.Birthdate = userRequest.Birthdate
+	userVerification.No_phone_number_user = isDMMemberDetails.Data.No_phone_number_user
 
 	if strings.TrimSpace(isDMMemberDetails.Data.Details.Cid) == "" {
 		userVerification.Is_member = false
