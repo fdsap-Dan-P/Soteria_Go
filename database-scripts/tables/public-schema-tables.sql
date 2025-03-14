@@ -19,6 +19,8 @@ create table public.user_passwords (
 	password_hash bytea NULL,
 	requires_password_reset bool null default true,
 	last_password_reset text null,
+	app_code text not null,
+	insti_code text not null,
 	created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP
 );

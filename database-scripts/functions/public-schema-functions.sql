@@ -66,19 +66,28 @@ $$ LANGUAGE plpgsql;
 
 
 -- get user's password reuse
-CREATE OR REPLACE FUNCTION password_reuse(user_id NUMERIC, reuse_limit NUMERIC)
-RETURNS TABLE(password_hash BYTEA) AS
-$$
+CREATE OR REPLACE FUNCTION public.password_reuse(
+    user_id numeric, 
+    reuse_limit numeric, 
+    insti_code text, 
+    app_code text
+)
+RETURNS TABLE(password_hash bytea)
+LANGUAGE plpgsql
+AS $function$
 BEGIN
     RETURN QUERY
     EXECUTE
         'SELECT password_hash FROM (
-        SELECT * FROM user_passwords
-          WHERE user_id = $1
-          AND (last_password_reset IS NOT NULL OR last_password_reset != '')
-          ORDER BY created_at DESC
-          LIMIT $2
-  ) subq' 
-  USING user_id, reuse_limit;
+            SELECT * FROM user_passwords
+            WHERE user_id = $1
+              AND last_password_reset IS NOT NULL
+              AND last_password_reset <> ''''  -- Handles empty string case for TEXT columns
+              AND insti_code = $2
+              AND app_code = $3
+            ORDER BY created_at DESC
+            LIMIT $4
+        ) subq'
+    USING user_id, insti_code, app_code, reuse_limit;
 END;
-$$ LANGUAGE plpgsql;
+$function$;
