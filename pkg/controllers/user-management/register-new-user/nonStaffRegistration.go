@@ -76,30 +76,22 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 		}
 	}
 
-	if strings.TrimSpace(newUserRequest.Phone_no) == "" {
-		returnMessage := middleware.ResponseData(newUserRequest.Username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Phone Number Input Missing", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
+	isPhoneNoFormatted := response.ReturnModel{}
+	if strings.TrimSpace(newUserRequest.Phone_no) != "" {
+		// format the phone number
+		isPhoneNoFormatted = middleware.NormalizePhoneNumber(newUserRequest.Phone_no, newUserRequest.Username, "", appDetails.Application_code, funcName, methodUsed, endpoint)
+		if !isPhoneNoFormatted.Data.IsSuccess {
+			return c.JSON(isPhoneNoFormatted)
 		}
-	}
-
-	if strings.TrimSpace(newUserRequest.Birthdate) == "" {
-		returnMessage := middleware.ResponseData(newUserRequest.Username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, newUserRequestByte, []byte(""), "Birth Date Input Missing", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	// format the phone number
-	isPhoneNoFormatted := middleware.NormalizePhoneNumber(newUserRequest.Phone_no, newUserRequest.Username, "", appDetails.Application_code, funcName, methodUsed, endpoint)
-	if !isPhoneNoFormatted.Data.IsSuccess {
-		return c.JSON(isPhoneNoFormatted)
 	}
 
 	// format the birthdate
-	isBdateFormatted := middleware.FormatingDate(newUserRequest.Birthdate, newUserRequest.Username, "", appDetails.Application_code, funcName, methodUsed, endpoint)
-	if !isBdateFormatted.Data.IsSuccess {
-		return c.JSON(isBdateFormatted)
+	isBdateFormatted := response.ReturnModel{}
+	if strings.TrimSpace(newUserRequest.Birthdate) != "" {
+		isBdateFormatted = middleware.FormatingDate(newUserRequest.Birthdate, newUserRequest.Username, "", appDetails.Application_code, funcName, methodUsed, endpoint)
+		if !isBdateFormatted.Data.IsSuccess {
+			return c.JSON(isBdateFormatted)
+		}
 	}
 
 	// validate email address
