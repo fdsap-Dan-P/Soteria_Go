@@ -18,7 +18,6 @@ func Login(c *fiber.Ctx) error {
 	credentialRequest := request.LoginCredentialsRequest{}
 	userDetails := response.UserDetails{}
 	userPasswordDetails := response.UserPasswordDetails{}
-	userAppDetails := response.UserApplicationDetails{}
 
 	methodUsed := c.Method()
 	endpoint := c.Path()
@@ -86,21 +85,6 @@ func Login(c *fiber.Ctx) error {
 
 	if userDetails.User_id == 0 {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Not Found", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	// validate if user is linked the application
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_app_view WHERE (username = ? OR staff_id = ? OR email = ? OR phone_no = ?) AND application_code = ?", credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity, appDetails.Application_code).Scan(&userAppDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, credentialRequestByte, []byte(""), "", fetchErr, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	if strings.TrimSpace(userAppDetails.Username) == "" { // user is not linked to the application
-		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "402", methodUsed, endpoint, credentialRequestByte, []byte(""), "Unauthorized Access", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
