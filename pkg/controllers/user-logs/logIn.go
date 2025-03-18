@@ -60,7 +60,7 @@ func Login(c *fiber.Ctx) error {
 		}
 	}
 
-	// check if staff_id has value
+	// check if password has value
 	if strings.TrimSpace(credentialRequest.Password) == "" {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Password Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
@@ -68,8 +68,16 @@ func Login(c *fiber.Ctx) error {
 		}
 	}
 
+	// check if institution code has value
+	if strings.TrimSpace(credentialRequest.Institution_code) == "" {
+		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, credentialRequestByte, []byte(""), "User Institution Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
 	// check if user identity is valid
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ? OR email = ? OR phone_no = ?", credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity).Scan(&userDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE (staff_id = ? OR username = ? OR email = ? OR phone_no = ?) AND institution_code = ? AND application_code = ?", credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.User_identity, credentialRequest.Institution_code, appDetails.Application_code).Scan(&userDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, credentialRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)

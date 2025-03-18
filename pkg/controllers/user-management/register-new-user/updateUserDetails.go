@@ -38,7 +38,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// check if to be updated exist
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ? OR email = ? OR phone_no = ?", userIdentity, userIdentity, userIdentity, userIdentity).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE (staff_id = ? OR username = ? OR email = ? OR phone_no = ?) AND application_code = ?", userIdentity, userIdentity, userIdentity, userIdentity, validationDetails.App_code).Scan(&UserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -53,6 +53,12 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	userIdToBeUpdated := UserDetails.User_id
+	if validationDetails.Insti_code != UserDetails.Institution_code {
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "402", methodUsed, endpoint, []byte(""), []byte(""), "Unauthorized To Update This User", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
 
 	// parse the request body
 	if parsErr := c.BodyParser(&newUserRequest); parsErr != nil {
@@ -94,7 +100,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		}
 
 		// validate if username already exists
-		if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? AND user_id != ?", newUserRequest.Staff_id, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+		if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? AND user_id != ? AND application_code = ? AND institution_code = ?", newUserRequest.Staff_id, userIdToBeUpdated, validationDetails.App_code, validationDetails.Insti_code).Scan(&UserDetailsChecker).Error; fetchErr != nil {
 			returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
@@ -171,7 +177,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// validate if username already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE username = ? AND user_id != ?", newUserRequest.Username, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE username = ? AND user_id != ? AND application_code = ? AND institution_code = ?", newUserRequest.Username, userIdToBeUpdated, validationDetails.App_code, validationDetails.Insti_code).Scan(&UserDetailsChecker).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -186,7 +192,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// validate if phone number already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE phone_no = ? AND user_id != ?", newUserRequest.Phone_no, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE phone_no = ? AND user_id != ? AND application_code = ? AND institution_code = ?", newUserRequest.Phone_no, userIdToBeUpdated, validationDetails.App_code, validationDetails.Insti_code).Scan(&UserDetailsChecker).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -201,7 +207,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// validate if email address already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE email = ? AND user_id != ?", newUserRequest.Email, userIdToBeUpdated).Scan(&UserDetailsChecker).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE email = ? AND user_id != ? AND application_code = ? AND institution_code = ?", newUserRequest.Email, userIdToBeUpdated, validationDetails.App_code, validationDetails.Insti_code).Scan(&UserDetailsChecker).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -245,7 +251,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	}
 
 	// get user details
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ?", newUserRequest.Username).Scan(&updatedUserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ? AND application_code = ? AND institution_code = ?", newUserRequest.Username, validationDetails.App_code, newUserRequest.Institution_code).Scan(&updatedUserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, validationDetails.App_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)

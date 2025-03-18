@@ -14,13 +14,16 @@ type (
 	}
 
 	LoginCredentialsRequest struct {
-		User_identity string `json:"user_identity"`
-		Password      string `json:"password"`
+		User_identity    string `json:"user_identity"`
+		Password         string `json:"password,omitempty"`
+		Institution_code string `json:"institution_code"`
 	}
 
 	ChangePasswordRequest struct {
-		Old_password string `json:"old_password"`
-		New_password string `json:"new_password"`
+		Username         string `json:"username"`
+		Old_password     string `json:"old_password,omitempty"`
+		New_password     string `json:"new_password,omitempty"`
+		Institution_code string `json:"institution_code"`
 	}
 
 	MemberVerificationRequest struct {

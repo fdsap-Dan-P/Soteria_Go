@@ -15,7 +15,6 @@ import (
 )
 
 func UserInitiatedPasswordChange(c *fiber.Ctx) error {
-	username := c.Params("username")
 	changePasswordRequest := request.ChangePasswordRequest{}
 	userDetails := response.UserDetails{}
 
@@ -33,24 +32,34 @@ func UserInitiatedPasswordChange(c *fiber.Ctx) error {
 		return c.JSON(apiKeyValidatedStatus)
 	}
 
-	// check if user exists
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ?", username).Scan(&userDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	if userDetails.User_id == 0 {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "User Not Found", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
 	// parse the request body
 	if parsErr := c.BodyParser(&changePasswordRequest); parsErr != nil {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
+		returnMessage := middleware.ResponseData("", "", appDetails.Application_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// marshal the request body
+	changePasswordRequestByte, marshalErr := json.Marshal(changePasswordRequest)
+	if marshalErr != nil {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Request Body Failed", nil, marshalErr)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// check if new password was provided
+	if strings.TrimSpace(changePasswordRequest.Username) == "" {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Username Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// check if new password was provided
+	if strings.TrimSpace(changePasswordRequest.Institution_code) == "" {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Institution Code Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -58,7 +67,22 @@ func UserInitiatedPasswordChange(c *fiber.Ctx) error {
 
 	// check if new password was provided
 	if strings.TrimSpace(changePasswordRequest.New_password) == "" {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, []byte(""), []byte(""), "New Password Missing", nil, nil)
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "New Password Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// check if user exists
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ? AND institution_code = ? AND application_code = ?", changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code).Scan(&userDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "", fetchErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if userDetails.User_id == 0 {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "User Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -70,7 +94,7 @@ func UserInitiatedPasswordChange(c *fiber.Ctx) error {
 	}
 
 	userDetails.Password = changePasswordRequest.New_password
-	successResp := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, []byte(""), []byte(""), "Successfully Updated Password", nil, userDetails)
+	successResp := middleware.ResponseData(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "203", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Successfully Updated Password", nil, userDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
@@ -79,7 +103,6 @@ func UserInitiatedPasswordChange(c *fiber.Ctx) error {
 }
 
 func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
-	username := c.Params("username")
 	changePasswordRequest := request.ChangePasswordRequest{}
 	userDetails := response.UserDetails{}
 	userPasswordDetails := response.UserPasswordDetails{}
@@ -98,24 +121,9 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 		return c.JSON(apiKeyValidatedStatus)
 	}
 
-	// check if user exists
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ?", username).Scan(&userDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
-	if userDetails.User_id == 0 {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "User Not Found", nil, nil)
-		if !returnMessage.Data.IsSuccess {
-			return c.JSON(returnMessage)
-		}
-	}
-
 	// parse the request body
 	if parsErr := c.BodyParser(&changePasswordRequest); parsErr != nil {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
+		returnMessage := middleware.ResponseData("", "", appDetails.Application_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -130,9 +138,25 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 		}
 	}
 
+	// check if username was provided
+	if strings.TrimSpace(changePasswordRequest.Username) == "" {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Username Input Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// check if institution code was provided
+	if strings.TrimSpace(changePasswordRequest.Institution_code) == "" {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Institution Code Input Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
 	// check if new password was provided
 	if strings.TrimSpace(changePasswordRequest.New_password) == "" {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "New Password Input Missing", nil, nil)
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "New Password Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -140,7 +164,22 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 
 	// check if old password was provided
 	if strings.TrimSpace(changePasswordRequest.Old_password) == "" {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Current Password Input Missing", nil, nil)
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Current Password Input Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// check if user exists
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ? AND institution_code = ? AND application_code = ?", changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code).Scan(&userDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "", fetchErr, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	if userDetails.User_id == 0 {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "User Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -177,7 +216,7 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 	}
 
 	userDetails.Password = changePasswordRequest.New_password
-	successResp := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "204", methodUsed, endpoint, []byte(""), []byte(""), "Successfully Updated Password", nil, userDetails)
+	successResp := middleware.ResponseData(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "204", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Successfully Updated Password", nil, userDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
@@ -186,7 +225,7 @@ func UserChangePasswordAfterExpired(c *fiber.Ctx) error {
 }
 
 func ResetUserPasswordToTemporary(c *fiber.Ctx) error {
-	username := c.Params("username")
+	changePasswordRequest := request.ChangePasswordRequest{}
 	userDetails := response.UserDetails{}
 
 	moduleName := "Security Management"
@@ -203,16 +242,49 @@ func ResetUserPasswordToTemporary(c *fiber.Ctx) error {
 		return c.JSON(apiKeyValidatedStatus)
 	}
 
+	// parse the request body
+	if parsErr := c.BodyParser(&changePasswordRequest); parsErr != nil {
+		returnMessage := middleware.ResponseData("", "", appDetails.Application_code, moduleName, funcName, "301", methodUsed, endpoint, []byte(""), []byte(""), "Parsing Request Body Failed", parsErr, parsErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// marshall the request body
+	changePasswordRequestByte, marshalErr := json.Marshal(changePasswordRequest)
+	if marshalErr != nil {
+		returnMessage := middleware.ResponseData(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "311", methodUsed, endpoint, []byte(""), []byte(""), "Marshalling Request Body Failed", marshalErr, marshalErr.Error())
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// check if username was provided
+	if strings.TrimSpace(changePasswordRequest.Username) == "" {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Username Input Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
+	// check if institution code was provided
+	if strings.TrimSpace(changePasswordRequest.Institution_code) == "" {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Institution Code Input Missing", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
+		}
+	}
+
 	// check if user exists
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ?", username).Scan(&userDetails).Error; fetchErr != nil {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ? AND institution_code = ? AND application_code = ?", changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code).Scan(&userDetails).Error; fetchErr != nil {
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
 	}
 
 	if userDetails.User_id == 0 {
-		returnMessage := middleware.ResponseData(username, "", appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, []byte(""), []byte(""), "User Not Found", nil, nil)
+		returnMessage := middleware.ResponseData(changePasswordRequest.Username, changePasswordRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "404", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "User Not Found", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
@@ -230,7 +302,7 @@ func ResetUserPasswordToTemporary(c *fiber.Ctx) error {
 	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - ")
 
 	userDetails.Password = isPassSetTemp.Data.Message
-	successResp := middleware.ResponseData(username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "204", methodUsed, endpoint, []byte(""), []byte(""), "Successfully Updated Password", nil, userDetails)
+	successResp := middleware.ResponseData(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "204", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Successfully Updated Password", nil, userDetails)
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}

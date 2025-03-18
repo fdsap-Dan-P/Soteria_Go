@@ -104,7 +104,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 	}
 
 	// validate if staff id already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ?", newUserRequest.Staff_id).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? AND application_code = ?", newUserRequest.Staff_id, appDetails.Application_code).Scan(&UserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -112,10 +112,9 @@ func StaffRegistration(c *fiber.Ctx) error {
 	}
 
 	if UserDetails.User_id != 0 {
-		// link the user to this application
-		isUserLinked := LinkingUserToApp(newUserRequest.Username, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, methodUsed, endpoint, UserDetails.User_id, appDetails.Application_id, newUserRequestByte)
-		if !isUserLinked.Data.IsSuccess {
-			return c.JSON(isUserLinked)
+		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "403", methodUsed, endpoint, newUserRequestByte, []byte(""), "Staff ID Already Exists", nil, nil)
+		if !returnMessage.Data.IsSuccess {
+			return c.JSON(returnMessage)
 		}
 	}
 
@@ -128,7 +127,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 
 	if hcisResponseStatus.RetCode == "405" || hcisResponseStatus.RetCode == "317" {
 		// validate if username already exist
-		if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ?", newUserRequest.Username).Scan(&userDetailValidation).Error; fetchErr != nil {
+		if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE username = ? AND application_code = ?", newUserRequest.Username, appDetails.Application_code).Scan(&userDetailValidation).Error; fetchErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Username, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
@@ -143,7 +142,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 		}
 
 		// validate if phone number already exist
-		if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE phone_no = ?", isPhoneNoFormatted.Data.Message).Scan(&userDetailValidation).Error; fetchErr != nil {
+		if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE phone_no = ? AND application_code = ?", isPhoneNoFormatted.Data.Message, appDetails.Application_code).Scan(&userDetailValidation).Error; fetchErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Username, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
@@ -174,7 +173,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 		}
 
 		// register the user
-		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, isPhoneNoFormatted.Data.Message, newUserRequest.Staff_id, instiDetails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message, instiDetails.Institution_code, appDetails.Application_code).Scan(&remark).Error; insertErr != nil {
+		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, newUserRequest.First_name, newUserRequest.Middle_name, newUserRequest.Last_name, newUserRequest.Email, isPhoneNoFormatted.Data.Message, newUserRequest.Staff_id, instiDetails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message, instiDetails.Institution_code, appDetails.Application_code, appDetails.Application_id).Scan(&remark).Error; insertErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
@@ -194,7 +193,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 		fmt.Println("CONDITION 3")
 		fmt.Println("RETCODE: ", hcisResponseStatus.RetCode)
 		// register the user
-		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, hcisResponseDeatails.Staff_id, hcisResponseDeatails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message, hcisResponseDeatails.Institution_code, appDetails.Application_code).Scan(&remark).Error; insertErr != nil {
+		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, hcisResponseDeatails.Staff_id, hcisResponseDeatails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message, hcisResponseDeatails.Institution_code, appDetails.Application_code, appDetails.Application_id).Scan(&remark).Error; insertErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
@@ -210,7 +209,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 	}
 
 	// get user details
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ?", newUserRequest.Staff_id, newUserRequest.Username).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ? AND application_code = ?`", newUserRequest.Staff_id, newUserRequest.Username, appDetails.Application_code).Scan(&UserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)

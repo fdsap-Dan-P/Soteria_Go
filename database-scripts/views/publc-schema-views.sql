@@ -1,6 +1,6 @@
 -- get user's details upon login
-create or replace view public.user_details as
-select
+CREATE OR REPLACE VIEW public.user_details
+AS SELECT ua.user_id,
     ua.username,
     ua.first_name,
     ua.middle_name,
@@ -11,9 +11,9 @@ select
     ua.last_login,
     i.institution_code,
     i.institution_name
-from
-    public.user_accounts ua
-    join offices_mapping.institutions i on i.institution_id = ua.institution_id;
+   FROM user_accounts ua
+     JOIN offices_mapping.institutions i ON i.institution_id = ua.institution_id
+     join applications a on a.application_id = ua.application_id;
 
 -- get user's linked applications
 create or replace view user_app_view as 

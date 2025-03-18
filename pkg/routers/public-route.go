@@ -45,7 +45,7 @@ func SetupPublicRoutes(app *fiber.App) {
 	userManagement.Post("/register-new-user/staff", registernewuser.StaffRegistration)
 	userManagement.Post("/register-new-user/non-staff", registernewuser.NonStaffRegistraion)
 	userManagement.Post("/update-user/:user_category/:user_identity", registernewuser.UpdateUserDetails)
-	userManagement.Get("/delete-user/:user_identity", usermanagement.DeleteUser)
+	userManagement.Post("/delete-user", usermanagement.DeleteUser)
 
 	//--- S E C U R I T Y    M A N A G E M E N T ---//
 	secManagement := auth.Group("/security-management")
@@ -55,7 +55,7 @@ func SetupPublicRoutes(app *fiber.App) {
 	secManagement.Get("/encrypt-api-key", securitymanagement.EncryptApiKey)
 	secManagement.Post("/change-password/:username", setuserpassword.UserInitiatedPasswordChange)
 	secManagement.Post("/expire-password/:username", setuserpassword.UserChangePasswordAfterExpired)
-	secManagement.Get("/reset-password/:username", setuserpassword.ResetUserPasswordToTemporary)
+	secManagement.Post("/reset-password/:username", setuserpassword.ResetUserPasswordToTemporary)
 
 	// Set Parameters
 	setParams := secManagement.Group("/parameters")
