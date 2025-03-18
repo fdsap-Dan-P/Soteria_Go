@@ -209,7 +209,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 	}
 
 	// get user details
-	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? OR username = ? AND application_code = ?`", newUserRequest.Staff_id, newUserRequest.Username, appDetails.Application_code).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE (staff_id = ? OR username = ?) AND application_code = ?", newUserRequest.Staff_id, newUserRequest.Username, appDetails.Application_code).Scan(&UserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
