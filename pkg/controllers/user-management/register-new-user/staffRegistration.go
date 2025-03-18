@@ -223,12 +223,6 @@ func StaffRegistration(c *fiber.Ctx) error {
 		}
 	}
 
-	// link the user to this application
-	isUserLinked := LinkingUserToApp(newUserRequest.Username, instiDetails.Institution_code, appDetails.Application_code, moduleName, funcName, methodUsed, endpoint, UserDetails.User_id, appDetails.Application_id, newUserRequestByte)
-	if !isUserLinked.Data.IsSuccess {
-		return c.JSON(isUserLinked)
-	}
-
 	// append the temp password to the user's details
 	UserDetails.Password = tempPassword
 

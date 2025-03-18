@@ -225,12 +225,6 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 		}
 	}
 
-	// link the user to this application
-	isUserLinked := LinkingUserToApp(newUserRequest.Username, userInstiCode, appDetails.Application_code, moduleName, funcName, methodUsed, endpoint, userDetails.User_id, appDetails.Application_id, newUserRequestByte)
-	if !isUserLinked.Data.IsSuccess {
-		return c.JSON(isUserLinked)
-	}
-
 	// append the temp password to the user's details
 	userDetails.Password = tempPassword
 
