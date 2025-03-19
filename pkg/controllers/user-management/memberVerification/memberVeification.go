@@ -62,12 +62,14 @@ func MemberVerification(c *fiber.Ctx) error {
 		}
 	}
 
-	// validate the phone number format
-	isPhoneNumberValidated := middleware.NormalizePhoneNumber(userRequest.Phone_no, fullName, "", validationDetails.Application_code, funcName, methodUsed, endpoint)
-	if !isPhoneNumberValidated.Data.IsSuccess {
-		return c.JSON(isPhoneNumberValidated)
+	if strings.TrimSpace(userRequest.Phone_no) != "" {
+		// validate the phone number format
+		isPhoneNumberValidated := middleware.NormalizePhoneNumber(userRequest.Phone_no, fullName, "", validationDetails.Application_code, funcName, methodUsed, endpoint)
+		if !isPhoneNumberValidated.Data.IsSuccess {
+			return c.JSON(isPhoneNumberValidated)
+		}
+		userRequest.Phone_no = isPhoneNumberValidated.Data.Message
 	}
-	userRequest.Phone_no = isPhoneNumberValidated.Data.Message
 
 	// format the birthdate
 	isBirthDateValid := middleware.FormatingDate(userRequest.Birthdate, fullName, "", validationDetails.Application_code, moduleName, methodUsed, endpoint)
