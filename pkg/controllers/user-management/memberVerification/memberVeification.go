@@ -55,7 +55,7 @@ func MemberVerification(c *fiber.Ctx) error {
 		}
 	}
 
-	if strings.TrimSpace(userRequest.Phone_no) == "" && strings.TrimSpace(userRequest.First_name) == "" && strings.TrimSpace(userRequest.Last_name) == "" && strings.TrimSpace(userRequest.Birthdate) == "" {
+	if strings.TrimSpace(userRequest.Phone_no) == "" {
 		returnMessage := middleware.ResponseData(fullName, "", validationDetails.Application_code, moduleName, funcName, "401", methodUsed, endpoint, userRequestByte, []byte(""), "Phone Number Input Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
