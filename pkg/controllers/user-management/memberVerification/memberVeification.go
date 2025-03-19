@@ -71,12 +71,14 @@ func MemberVerification(c *fiber.Ctx) error {
 		userRequest.Phone_no = isPhoneNumberValidated.Data.Message
 	}
 
-	// format the birthdate
-	isBirthDateValid := middleware.FormatingDate(userRequest.Birthdate, fullName, "", validationDetails.Application_code, moduleName, methodUsed, endpoint)
-	if !isBirthDateValid.Data.IsSuccess {
-		return c.JSON(isBirthDateValid)
+	if strings.TrimSpace(userRequest.Birthdate) != "" {
+		// format the birthdate
+		isBirthDateValid := middleware.FormatingDate(userRequest.Birthdate, fullName, "", validationDetails.Application_code, moduleName, methodUsed, endpoint)
+		if !isBirthDateValid.Data.IsSuccess {
+			return c.JSON(isBirthDateValid)
+		}
+		userRequest.Birthdate = isBirthDateValid.Data.Message
 	}
-	userRequest.Birthdate = isBirthDateValid.Data.Message
 
 	// get API key
 	apiKey := os.Getenv("DATA_MART_API_KEY")
