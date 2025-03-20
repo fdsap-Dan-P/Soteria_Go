@@ -37,7 +37,7 @@ func SetupPublicRoutes(app *fiber.App) {
 	//--- U S E R    L O G S ---//
 	userLogs := auth.Group("/user-logs")
 	userLogs.Post("/login", userlogs.Login)
-	userLogs.Get("/:username/logout", userlogs.LogOut)
+	userLogs.Post("/logout", userlogs.LogOut)
 
 	//--- U S E R    M A N A G E M E N T ---//
 	userManagement := auth.Group("/user-management")
