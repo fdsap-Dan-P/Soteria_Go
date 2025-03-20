@@ -53,9 +53,9 @@ func SetupPublicRoutes(app *fiber.App) {
 	secManagement.Post("/register-application", securitymanagement.AppRegistration)           // admin only
 	secManagement.Post("/retrieve-api-key/:app-code", securitymanagement.RetrievePlainApiKey) // admin only
 	secManagement.Get("/encrypt-api-key", securitymanagement.EncryptApiKey)
-	secManagement.Post("/change-password/:username", setuserpassword.UserInitiatedPasswordChange)
-	secManagement.Post("/expire-password/:username", setuserpassword.UserChangePasswordAfterExpired)
-	secManagement.Post("/reset-password/:username", setuserpassword.ResetUserPasswordToTemporary)
+	secManagement.Post("/change-password", setuserpassword.UserInitiatedPasswordChange)
+	secManagement.Post("/expire-password", setuserpassword.UserChangePasswordAfterExpired)
+	secManagement.Post("/reset-password", setuserpassword.ResetUserPasswordToTemporary)
 
 	// Set Parameters
 	setParams := secManagement.Group("/parameters")
