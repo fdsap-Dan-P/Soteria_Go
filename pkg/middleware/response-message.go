@@ -57,6 +57,8 @@ func ResponseData(username, instiCode, appCode, moduleName, funcName, retcode, m
 	// fmt.Println("REF ID: ", refID)
 	fmt.Println("============= REQUEST DETAILS =============")
 	fmt.Println("USERNAME: ", username)
+	fmt.Println("APP CODE: ", appCode)
+	fmt.Println("INSTI CODE: ", instiCode)
 	fmt.Println("FUNCTION NAME: ", funcName)
 	// if funcName != subFuncName {
 	// 	fmt.Println("SUB FUNCTION NAME: ", subFuncName)
