@@ -35,7 +35,7 @@ func HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endp
 	}
 
 	// check if token was stored
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM logs.user_tokens WHERE (username = ? OR staff_id = ?) AND token = ? AND insti_code = ? AND app_code = ?", tokenValidatedStatus.Message, tokenValidatedStatus.Message, tokenString, tokenValidatedStatus.Data.Message, appDetails.Application_code).Scan(&userTokenDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM logs.user_tokens WHERE (username = ? OR staff_id = ?) AND token = ? AND insti_code = ? AND app_code = ?", tokenValidatedStatus.Message, tokenValidatedStatus.Message, tokenString, tokenValidatedStatus.Data.Message, appDetails.Application_code).Scan(&userTokenDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, validationResponse

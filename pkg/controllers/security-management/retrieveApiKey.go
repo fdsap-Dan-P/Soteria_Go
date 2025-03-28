@@ -60,7 +60,7 @@ func RetrievePlainApiKey(c *fiber.Ctx) error {
 		}
 
 		// get the user api key details
-		if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.applications WHERE api_key = ?", userEncryptedApiKey).Scan(&userApiKeyDetails).Error; fetchErr != nil {
+		if fetchErr := database.DBConn.Raw("SELECT * FROM public.applications WHERE api_key = ?", userEncryptedApiKey).Scan(&userApiKeyDetails).Error; fetchErr != nil {
 			returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)

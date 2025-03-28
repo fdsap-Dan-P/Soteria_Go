@@ -54,7 +54,7 @@ func AppRegistration(c *fiber.Ctx) error {
 	}
 
 	// get the user api key details
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.applications WHERE api_key = ?", userEncryptedApiKey).Scan(&userApiKeyDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.applications WHERE api_key = ?", userEncryptedApiKey).Scan(&userApiKeyDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "302", methodUsed, endpoint, []byte(""), []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
@@ -102,7 +102,7 @@ func AppRegistration(c *fiber.Ctx) error {
 	}
 
 	// check if app name already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.applications WHERE application_name = ?", newAppRequest.App_name).Scan(&appDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.applications WHERE application_name = ?", newAppRequest.App_name).Scan(&appDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "302", methodUsed, endpoint, newAppRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)

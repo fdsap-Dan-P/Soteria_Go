@@ -101,7 +101,7 @@ func StaffRegistration(c *fiber.Ctx) error {
 	}
 
 	// validate if staff id already exists
-	if fetchErr := database.DBConn.Debug().Raw("SELECT * FROM public.user_details WHERE staff_id = ? AND application_code = ?", newUserRequest.Staff_id, appDetails.Application_code).Scan(&UserDetails).Error; fetchErr != nil {
+	if fetchErr := database.DBConn.Raw("SELECT * FROM public.user_details WHERE staff_id = ? AND application_code = ?", newUserRequest.Staff_id, appDetails.Application_code).Scan(&UserDetails).Error; fetchErr != nil {
 		returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
