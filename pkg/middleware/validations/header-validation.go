@@ -2,7 +2,6 @@ package validations
 
 import (
 	"encoding/json"
-	"fmt"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
 	"soteria_go/pkg/utils/go-utils/database"
@@ -16,9 +15,6 @@ func HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endp
 
 	token := strings.TrimPrefix(authHeader, "Bearer")
 	tokenString := strings.TrimSpace(token)
-
-	fmt.Println("Auth header: ", authHeader)
-	fmt.Println("Token string: ", tokenString)
 
 	if strings.TrimSpace(authHeader) == "" || tokenString == "" {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "111", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)

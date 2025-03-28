@@ -242,9 +242,5 @@ func NonStaffRegistraion(c *fiber.Ctx) error {
 		return c.JSON(successResp)
 	}
 
-	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - -")
-	fmt.Println("successResp", successResp)
-	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - -")
-
 	return c.JSON(successResp)
 }

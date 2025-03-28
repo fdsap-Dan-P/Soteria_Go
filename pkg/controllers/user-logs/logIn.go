@@ -2,7 +2,6 @@ package userlogs
 
 import (
 	"encoding/json"
-	"fmt"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/request"
@@ -26,7 +25,6 @@ func Login(c *fiber.Ctx) error {
 
 	// Extraxt the api key
 	apiKey := c.Get("X-API-Key")
-	fmt.Println("API KEY: ", apiKey)
 
 	// validate the api key
 	apiKeyValidatedStatus, appDetails := validations.APIKeyValidation(apiKey, "", "", "", moduleName, methodUsed, endpoint, []byte(""))
@@ -117,12 +115,8 @@ func Login(c *fiber.Ctx) error {
 	userDetails.Requires_password_reset = userPasswordDetails.Requires_password_reset
 	userDetails.Last_password_reset = userPasswordDetails.Last_password_reset
 
-	fmt.Println("INSTI CODE: ", userDetails.Institution_code)
-
 	// generate the jwt token
 	token, tokenErr := middleware.GenerateToken(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, methodUsed, endpoint)
-	fmt.Print("token: ", token)
-	fmt.Println("tokenErr: ", tokenErr)
 	if tokenErr != nil {
 		returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "305", methodUsed, endpoint, credentialRequestByte, []byte(""), "", tokenErr, tokenErr.Error())
 		if !returnMessage.Data.IsSuccess {
@@ -146,8 +140,6 @@ func Login(c *fiber.Ctx) error {
 			return c.JSON(returnMessage)
 		}
 	}
-
-	fmt.Println("userDetailsByte: ", string(userDetailsByte))
 
 	returnMessage := middleware.ResponseData(credentialRequest.User_identity, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "201", methodUsed, endpoint, credentialRequestByte, userDetailsByte, "", nil, userDetails)
 	if !returnMessage.Data.IsSuccess {

@@ -2,7 +2,6 @@ package setuserpassword
 
 import (
 	"encoding/json"
-	"fmt"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/request"
@@ -294,12 +293,6 @@ func ResetUserPasswordToTemporary(c *fiber.Ctx) error {
 	if !isPassSetTemp.Data.IsSuccess {
 		return c.JSON(isPassSetTemp)
 	}
-
-	fmt.Println("- - - - - - - - PASSWORD TRACING - - - - - - - - ")
-	fmt.Println("PROJECT NAME: SOTERIA")
-	fmt.Println("FUNCTION NAME: ResetUserPasswordToTemporary")
-	fmt.Println("TEMPOPARY PASSWORD: ", isPassSetTemp.Data.Message)
-	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - ")
 
 	userDetails.Password = isPassSetTemp.Data.Message
 	successResp := middleware.ResponseData(userDetails.Username, userDetails.Institution_code, appDetails.Application_code, moduleName, funcName, "204", methodUsed, endpoint, changePasswordRequestByte, []byte(""), "Successfully Updated Password", nil, userDetails)

@@ -2,7 +2,6 @@ package validations
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/response"
@@ -17,7 +16,6 @@ func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUs
 
 	// check if api key has value
 	if strings.TrimSpace(apiKey) == "" {
-		fmt.Println("API KEY: ", apiKey)
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "401", methodUsed, endpoint, reqBody, []byte(""), "API Key Authorization Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, appDetails
@@ -70,6 +68,5 @@ func APIKeyValidation(apiKey, username, instiCode, appCode, moduleName, methodUs
 
 	successResp := response.ReturnModel{Data: response.DataModel{IsSuccess: true}}
 
-	fmt.Println("APP DETAILS: ", appDetails)
 	return successResp, appDetails
 }

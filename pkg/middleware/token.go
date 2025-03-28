@@ -144,7 +144,6 @@ func StoringUserToken(tokenString, username, staffId, instiCode, appCode, module
 		}
 	}
 
-	fmt.Println("Token id: ", userTokenDetails.Token_id)
 	if userTokenDetails.Token_id == 0 {
 		if insErr := database.DBConn.Debug().Raw("SELECT logs.create_user_token(?, ?, ?, ?, ?) AS remark", username, staffId, tokenString, instiCode, appCode).Scan(&remark).Error; insErr != nil {
 			returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "303", methodUsed, endpoint, reqBody, []byte(""), "", insErr, insErr.Error())

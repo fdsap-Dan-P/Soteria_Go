@@ -2,7 +2,6 @@ package registernewuser
 
 import (
 	"encoding/json"
-	"fmt"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/middleware/validations"
 	"soteria_go/pkg/models/request"
@@ -51,8 +50,6 @@ func StaffRegistration(c *fiber.Ctx) error {
 			return c.JSON(returnMessage)
 		}
 	}
-
-	fmt.Println("ADD USER REQUEST BODY: ", string(newUserRequestByte))
 
 	// check if staff_id has value
 	if strings.TrimSpace(newUserRequest.Staff_id) == "" {
@@ -156,8 +153,6 @@ func StaffRegistration(c *fiber.Ctx) error {
 			}
 		}
 
-		fmt.Println("CONDITION 1")
-		fmt.Println("RETCODE: ", hcisResponseStatus.RetCode)
 		if fetchErr := database.DBConn.Raw("SELECT * FROM offices_mapping.institutions WHERE institution_code = ?", newUserRequest.Institution_code).Scan(&instiDetails).Error; fetchErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, "", appDetails.Application_code, moduleName, funcName, "302", methodUsed, endpoint, newUserRequestByte, []byte(""), "", fetchErr, fetchErr.Error())
 			if !returnMessage.Data.IsSuccess {
@@ -187,11 +182,8 @@ func StaffRegistration(c *fiber.Ctx) error {
 			}
 		}
 	} else if !hcisResponseStatus.Data.IsSuccess {
-		fmt.Println("CONDITION 2")
-		fmt.Println("RETCODE: ", hcisResponseStatus.RetCode)
+		return c.JSON(hcisResponseStatus)
 	} else {
-		fmt.Println("CONDITION 3")
-		fmt.Println("RETCODE: ", hcisResponseStatus.RetCode)
 		// register the user
 		if insertErr := database.DBConn.Raw("SELECT public.register_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) AS remark", newUserRequest.Username, hcisResponseDeatails.First_name, hcisResponseDeatails.Middle_name, hcisResponseDeatails.Last_name, hcisResponseDeatails.Email, hcisResponseDeatails.Phone_no, hcisResponseDeatails.Staff_id, hcisResponseDeatails.Institution_id, hashTempPassword, true, "", isBdateFormatted.Data.Message, hcisResponseDeatails.Institution_code, appDetails.Application_code, appDetails.Application_id).Scan(&remark).Error; insertErr != nil {
 			returnMessage := middleware.ResponseData(newUserRequest.Staff_id, newUserRequest.Institution_code, appDetails.Application_code, moduleName, funcName, "303", methodUsed, endpoint, newUserRequestByte, []byte(""), "", insertErr, insertErr.Error())
@@ -239,10 +231,6 @@ func StaffRegistration(c *fiber.Ctx) error {
 	if !successResp.Data.IsSuccess {
 		return c.JSON(successResp)
 	}
-
-	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - -")
-	fmt.Println("successResp", successResp)
-	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - -")
 
 	return c.JSON(successResp)
 }

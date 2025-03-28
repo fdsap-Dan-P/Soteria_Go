@@ -272,7 +272,5 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		return c.JSON(successResp)
 	}
 
-	fmt.Println(successResp)
-
 	return c.JSON(successResp)
 }

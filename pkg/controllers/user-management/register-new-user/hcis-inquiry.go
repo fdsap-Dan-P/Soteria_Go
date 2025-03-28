@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"soteria_go/pkg/middleware"
@@ -75,8 +74,6 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", hcis_authHeader)
 
-	fmt.Println(req)
-
 	// Send the request
 	resp, respErr := client.Do(req)
 	if respErr != nil {
@@ -87,13 +84,6 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	}
 	defer resp.Body.Close()
 
-	// check the response from HCIS
-	fmt.Println("- - - - - - - - - - HCIS Response - - - - - - - - - - -")
-	fmt.Println("STATUS: ", resp.StatusCode)
-	fmt.Println("SUCCESS \n", resp)
-	fmt.Println("ERROR: ", respErr)
-	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-
 	if respErr != nil {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "317", methodUsed, endpoint, reqBody, []byte(""), "Reading HCIS Response Failed", respErr, userHCISDetails)
 		if !returnMessage.Data.IsSuccess {
@@ -102,9 +92,6 @@ func HcisInquiry(staffId, username, instiCode, appCode, moduleName, methodUsed, 
 	}
 
 	// Check if the request was successful (status code 200)
-	fmt.Println("- - - - - STATUS CODE - - - - - - -")
-	fmt.Println("resp.StatusCode: ", resp.StatusCode)
-	fmt.Println("http.StatusOK: ", http.StatusOK)
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
 		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "405", methodUsed, endpoint, reqBody, []byte(""), "Request Failed To HCIS", respErr, userHCISDetails)
 		if !returnMessage.Data.IsSuccess {

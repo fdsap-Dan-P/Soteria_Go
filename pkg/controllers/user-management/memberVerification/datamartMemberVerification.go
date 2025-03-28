@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -45,8 +44,6 @@ func VerifyMemberFromDataMart(fullName, appCode, moduleName, methodUsed, endpoin
 	}
 	dmMemberVerificationReq.Header.Set("Content-Type", "application/json")
 	dmMemberVerificationReq.Header.Set("X-API-Key", apiKey)
-
-	fmt.Println(dmMemberVerificationReq)
 
 	// Send the request
 	dmMemberVerificationResp, dmMemberVerificationRespErr := dmMemberVerificationClient.Do(dmMemberVerificationReq)

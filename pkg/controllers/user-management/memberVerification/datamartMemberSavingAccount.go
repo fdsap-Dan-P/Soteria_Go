@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -51,8 +50,6 @@ func GetMemberSavingAcountDetailsFromDataMart(cid, instiCode, fullName, appCode,
 	}
 	dmMemberSavingReq.Header.Set("Content-Type", "application/json")
 	dmMemberSavingReq.Header.Set("X-API-Key", apiKey)
-
-	fmt.Println(dmMemberSavingReq)
 
 	// Send the request
 	dmMemberSavingResp, dmMemberSavingRespErr := dmMemberSavingClient.Do(dmMemberSavingReq)

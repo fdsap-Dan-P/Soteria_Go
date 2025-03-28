@@ -2,7 +2,6 @@ package securitymanagement
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"soteria_go/pkg/middleware"
 	"soteria_go/pkg/models/request"
@@ -109,8 +108,6 @@ func AppRegistration(c *fiber.Ctx) error {
 			return c.JSON(returnMessage)
 		}
 	}
-
-	fmt.Println(appDetails.Application_id)
 
 	if appDetails.Application_id != 0 {
 		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "403", methodUsed, endpoint, newAppRequestByte, []byte(""), "Application Name Already Exists", nil, nil)
