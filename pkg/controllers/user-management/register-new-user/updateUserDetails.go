@@ -170,7 +170,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 	// validate email address
 	isEmailAddrValid := middleware.ValidateEmail(newUserRequest.Email)
 	if !isEmailAddrValid {
-		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "109", methodUsed, endpoint, newUserRequestByte, []byte(""), "", nil, nil)
+		returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "103", methodUsed, endpoint, newUserRequestByte, []byte(""), "Invalid Email Address", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return c.JSON(returnMessage)
 		}
