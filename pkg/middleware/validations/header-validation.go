@@ -43,7 +43,7 @@ func HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endp
 	}
 
 	if userTokenDetails.Token_id == 0 {
-		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "116", methodUsed, endpoint, []byte(""), []byte(""), "Terminated Token", nil, nil)
+		returnMessage := middleware.ResponseData(tokenValidatedStatus.Message, tokenValidatedStatus.Data.Message, appDetails.Application_code, moduleName, funcName, "109", methodUsed, endpoint, []byte(""), []byte(""), "Terminated Token", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, validationResponse
 		}
