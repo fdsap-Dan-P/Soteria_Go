@@ -33,7 +33,7 @@ func FormatingDate(dateString, username, instiCode, appCode, moduleName, methodU
 	}
 
 	if formatedDatErr != nil {
-		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "107", methodUsed, endpoint, []byte(dateString), []byte(""), "", nil, nil)
+		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "103", methodUsed, endpoint, []byte(dateString), []byte(""), "Invalid Date Format", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
