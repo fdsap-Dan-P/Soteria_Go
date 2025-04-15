@@ -17,7 +17,7 @@ func HeaderValidation(authHeader, apiKey, moduleName, funcName, methodUsed, endp
 	tokenString := strings.TrimSpace(token)
 
 	if strings.TrimSpace(authHeader) == "" || tokenString == "" {
-		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "111", methodUsed, endpoint, []byte(""), []byte(""), "", nil, nil)
+		returnMessage := middleware.ResponseData("", "", "", moduleName, funcName, "401", methodUsed, endpoint, []byte(""), []byte(""), "Token Missing", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return returnMessage, validationResponse
 		}
