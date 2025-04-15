@@ -93,7 +93,7 @@ func UpdateUserDetails(c *fiber.Ctx) error {
 		// validate the staff id format
 		isStaffIdValidated := validations.StaffIdValidation(newUserRequest.Staff_id, moduleName, methodUsed, endpoint)
 		if !isStaffIdValidated {
-			returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "112", methodUsed, endpoint, newUserRequestByte, []byte(""), "Invalid Employee ID", nil, nil)
+			returnMessage := middleware.ResponseData(validationDetails.Username, validationDetails.Insti_code, validationDetails.App_code, moduleName, funcName, "103", methodUsed, endpoint, newUserRequestByte, []byte(""), "Invalid Employee ID", nil, nil)
 			if !returnMessage.Data.IsSuccess {
 				return c.JSON(returnMessage)
 			}
