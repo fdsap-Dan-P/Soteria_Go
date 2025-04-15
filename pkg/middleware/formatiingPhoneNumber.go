@@ -25,14 +25,14 @@ func NormalizePhoneNumber(phonenumber, username, instiCode, appCode, funcName, m
 	} else if phonenumber[0:1] == "9" {
 		normalizedPhonenumber = "0" + phonenumber
 	} else {
-		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "108", methodUsed, endpoint, []byte(phonenumber), []byte(""), "", nil, nil)
+		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "103", methodUsed, endpoint, []byte(phonenumber), []byte(""), "Invalid Phone Number", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
 	}
 
 	if len(normalizedPhonenumber) != 11 {
-		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "108", methodUsed, endpoint, []byte(phonenumber), []byte(""), "", nil, nil)
+		returnMessage := ResponseData(username, instiCode, appCode, moduleName, funcName, "103", methodUsed, endpoint, []byte(phonenumber), []byte(""), "Invalid Phone Number", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
