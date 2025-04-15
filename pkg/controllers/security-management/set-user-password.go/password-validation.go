@@ -30,7 +30,7 @@ func PasswordValidation(password, instiCode, appCode, username, moduleName, meth
 	}
 
 	if passMin.Config_id == 0 || strings.TrimSpace(passMin.Config_value) == "" {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "121", methodUsed, endpoint, []byte(""), []byte(""), "No Config Password Mininum Set", nil, passMin)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "106", methodUsed, endpoint, []byte(""), []byte(""), "No Config Password Mininum Set", nil, passMin)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
@@ -133,7 +133,7 @@ func PasswordReuseValidation(password string, instiCode string, appCode string, 
 	}
 
 	if minPassReuse.Config_id == 0 || strings.TrimSpace(minPassReuse.Config_value) == "" {
-		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "121", methodUsed, endpoint, []byte(""), []byte(""), "No Minimum Password Reuse Config Set", nil, nil)
+		returnMessage := middleware.ResponseData(username, instiCode, appCode, moduleName, funcName, "106", methodUsed, endpoint, []byte(""), []byte(""), "No Minimum Password Reuse Config Set", nil, nil)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}

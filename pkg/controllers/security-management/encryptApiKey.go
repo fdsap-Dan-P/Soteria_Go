@@ -28,7 +28,7 @@ func EncryptApiKey(c *fiber.Ctx) error {
 
 	if len(appDetailsList) == 0 {
 		return c.JSON(response.ReturnModel{
-			RetCode: "121",
+			RetCode: "106",
 			Message: "Validation Failed",
 			Data: response.DataModel{
 				Message:   "No Data Available",
