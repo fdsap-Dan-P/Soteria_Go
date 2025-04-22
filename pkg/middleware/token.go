@@ -96,7 +96,7 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 	}
 
 	if !token.Valid {
-		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf("%s", tokenString), token)
+		returnMessage := ResponseData("", "", appCode, moduleName, funcName, "103", methodUsed, endpoint, []byte(tokenString), []byte(""), "Invalid Token", fmt.Errorf("%s", tokenString), token)
 		if !returnMessage.Data.IsSuccess {
 			return (returnMessage)
 		}
@@ -116,7 +116,7 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 		}
 	}
 
-	returnMessage := ResponseData("", "", appCode, moduleName, funcName, "104", methodUsed, endpoint, []byte(tokenString), []byte(""), "", fmt.Errorf("%s", tokenString), token)
+	returnMessage := ResponseData("", "", appCode, moduleName, funcName, "103", methodUsed, endpoint, []byte(tokenString), []byte(""), "Invalid Token", fmt.Errorf("%s", tokenString), token)
 	if !returnMessage.Data.IsSuccess {
 		return (returnMessage)
 	}
