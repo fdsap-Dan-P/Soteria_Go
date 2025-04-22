@@ -83,7 +83,7 @@ func ParseToken(tokenString, appCode, moduleName, methodUsed, endpoint string) r
 		// Check if the error is due to token expiration
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				returnMessage := ResponseData("", "", appCode, moduleName, funcName, "110", methodUsed, endpoint, []byte(tokenString), []byte(""), "", ve, nil)
+				returnMessage := ResponseData("", "", appCode, moduleName, funcName, "102", methodUsed, endpoint, []byte(tokenString), []byte(""), "Expired Token", ve, nil)
 				if !returnMessage.Data.IsSuccess {
 					return (returnMessage)
 				}
